@@ -1,0 +1,32 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+*.translation
+
+# Godot export presets may contain secrets (keystore paths/passwords) — keep local
+export_presets.cfg
+
+# Exported builds
+*.apk
+*.aab
+/build/
+/exports/
+/dist/
+
+# Keystores / signing
+*.keystore
+*.jks
+*.p12
+*.pepk
+
+# Secrets / local config
+.env
+.env.local
+*.local
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

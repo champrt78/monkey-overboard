@@ -7,7 +7,17 @@ he splashes into the water where a gator is waiting.
 
 Spiritually descended from Bally/Midway's *Clowns* (1978), reskinned and re-themed.
 
-## Play
+## Two versions in this repo
+
+- **`/` (root) — web prototype.** Vanilla JS + Canvas, zero build, runs from `index.html`
+  and is deployed to GitHub Pages. This is where the mechanic and pixel look were prototyped.
+- **`/godot` — the real Android game.** A Godot 4.6 port of the same game, targeting a native
+  `.aab` for the Play Store (Play Billing to follow). Open the `godot/` folder in **Godot 4.6**.
+  The pixel look comes from a 135×240 low-res viewport stretched up with nearest filtering;
+  the catch/flip + physics are ported from the verified web build (see `godot/main.gd`).
+  A headless self-test is available: `godot --headless --path godot --mo-selftest`.
+
+## Play (web prototype)
 
 - **Open `index.html`** in any browser — double-click it, or serve the folder.
 - **Drag** left/right to slide the see-saw.
