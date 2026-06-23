@@ -33,6 +33,9 @@ window.MO = window.MO || {};
 
   const splashes = [];
 
+  // Debug handle: expose live state for quick inspection / autopilot testing.
+  MO.state = state;
+
   function startGame() {
     state.phase = "playing";
     state.score = 0;

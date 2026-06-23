@@ -1,11 +1,35 @@
-// Camera + all drawing: world, tree, water, see-saw, monkeys, bananas, gator, HUD.
+// Pixel-art renderer. Everything is drawn into a small low-res buffer and then
+// blitted up with smoothing off, which gives crisp chunky pixels for free.
+// HUD/overlays are drawn crisp on the main canvas afterwards.
 window.MO = window.MO || {};
 
 MO.render = (function () {
   const C = MO.config;
   const E = MO.entities;
 
-  // Camera follows the airborne monkey, clamped to the world.
+  const SCALE = 4; // 1 buffer pixel = 4 screen pixels (retro chunk size)
+  const BW = Math.round(C.VIEW_W / SCALE);
+  const BH = Math.round(C.VIEW_H / SCALE);
+
+  let buf = null, bctx = null;
+  function ensureBuffer() {
+    if (buf) return;
+    buf = document.createElement("canvas");
+    buf.width = BW;
+    buf.height = BH;
+    bctx = buf.getContext("2d");
+  }
+
+  // Palette
+  const SKY_TOP = "#8fd3e6", SKY_BOT = "#5fbf8e";
+  const TRUNK = "#7a4a1e", TRUNK_HI = "#915a26";
+  const LEAF = "#2f8f3f", LEAF_HI = "#3fae4f";
+  const WATER = "#1f6fb0", WATER_HI = "#2f86c8";
+  const M_BODY = "#8a5a2b", M_DARK = "#5e3a17", M_FACE = "#f3ddc0", M_EYE = "#1a1a1a";
+  const GATOR = "#2f7d2f", GATOR_HI = "#3a9a3a", GATOR_DK = "#1f4d1f";
+  const BANANA = "#ffd23c", BANANA_DK = "#d9a81f";
+  const WOOD = "#b9742f", WOOD_DK = "#8a5a2b";
+
   function cameraY(state) {
     const air = state.monkeys[state.airIndex];
     const target = air.y - C.VIEW_H * 0.45;
@@ -13,214 +37,203 @@ MO.render = (function () {
   }
 
   function draw(ctx, state, splashes) {
-    const camY = state.phase === "playing" || state.phase === "gameover"
+    ensureBuffer();
+    const camY = (state.phase === "playing" || state.phase === "gameover")
       ? cameraY(state) : C.WORLD_H - C.VIEW_H;
 
-    drawSky(ctx, camY);
-    ctx.save();
-    ctx.translate(0, -camY);
+    // Everything in buffer space: world coords / SCALE, shifted by the camera.
+    const oy = -camY / SCALE;
 
-    drawTree(ctx);
-    drawBananas(ctx, state);
-    drawWater(ctx, camY);
-    drawGator(ctx, state.gator);
-    drawSplashes(ctx, splashes);
-    drawSeesaw(ctx, state);
-    drawMonkeys(ctx, state);
+    drawSky(camY);
+    bctx.save();
+    bctx.translate(0, oy);
+    drawTree();
+    drawBananas(state);
+    drawWater(camY);
+    drawGator(state.gator);
+    drawSplashes(splashes);
+    drawSeesaw(state);
+    drawMonkeys(state);
+    bctx.restore();
 
-    ctx.restore();
+    // Blit the buffer up, pixelated.
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(buf, 0, 0, C.VIEW_W, C.VIEW_H);
 
     drawOffscreenIndicator(ctx, state, camY);
     drawHUD(ctx, state);
   }
 
-  function drawSky(ctx, camY) {
-    // A vertical gradient over the whole world, sampled for the current view.
-    const g = ctx.createLinearGradient(0, 0, 0, C.VIEW_H);
-    const topT = camY / C.WORLD_H;
-    const botT = (camY + C.VIEW_H) / C.WORLD_H;
-    g.addColorStop(0, mix("#aee7ff", "#5bbf8a", topT));
-    g.addColorStop(1, mix("#aee7ff", "#5bbf8a", botT));
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, C.VIEW_W, C.VIEW_H);
+  // ---- buffer-space draw helpers (b = buffer coords) ----
+  const s = (v) => v / SCALE;
+  function rect(x, y, w, h, c) { bctx.fillStyle = c; bctx.fillRect(Math.round(x), Math.round(y), Math.ceil(w), Math.ceil(h)); }
+  function px(x, y, c) { bctx.fillStyle = c; bctx.fillRect(Math.round(x), Math.round(y), 1, 1); }
+  function circle(x, y, r, c) { bctx.fillStyle = c; bctx.beginPath(); bctx.arc(x, y, r, 0, 7); bctx.fill(); }
+  function ell(x, y, rx, ry, c) { bctx.fillStyle = c; bctx.beginPath(); bctx.ellipse(x, y, rx, ry, 0, 0, 7); bctx.fill(); }
+  function stroke(x1, y1, x2, y2, w, c) { bctx.strokeStyle = c; bctx.lineWidth = w; bctx.lineCap = "round"; bctx.beginPath(); bctx.moveTo(x1, y1); bctx.lineTo(x2, y2); bctx.stroke(); }
+
+  function drawSky(camY) {
+    const g = bctx.createLinearGradient(0, 0, 0, BH);
+    const t0 = camY / C.WORLD_H, t1 = (camY + C.VIEW_H) / C.WORLD_H;
+    g.addColorStop(0, mix(SKY_TOP, SKY_BOT, t0));
+    g.addColorStop(1, mix(SKY_TOP, SKY_BOT, t1));
+    bctx.fillStyle = g;
+    bctx.fillRect(0, 0, BW, BH);
   }
 
-  function drawTree(ctx) {
-    const trunkW = 70;
-    const cx = C.WORLD_W / 2;
-    ctx.fillStyle = "#6b4226";
-    ctx.fillRect(cx - trunkW / 2, 120, trunkW, C.WATER_Y - 120);
-    // A few leafy branches.
-    ctx.fillStyle = "#3f8f3f";
-    for (let y = 220; y < C.WATER_Y - 200; y += 360) {
-      const side = (y / 360) % 2 < 1 ? -1 : 1;
-      ctx.beginPath();
-      ctx.ellipse(cx + side * 90, y, 110, 46, 0, 0, Math.PI * 2);
-      ctx.fill();
+  function drawTree() {
+    const cx = s(C.WORLD_W / 2);
+    const top = s(110), bottom = s(C.WATER_Y);
+    rect(cx - s(17), top, s(34), bottom - top, TRUNK);
+    rect(cx - s(17), top, s(8), bottom - top, TRUNK_HI); // light side
+    // leaf clusters up the trunk
+    for (let wy = 220; wy < C.WATER_Y - 180; wy += 360) {
+      const side = ((wy / 360) | 0) % 2 ? 1 : -1;
+      ell(cx + side * s(90), s(wy), s(58), s(28), LEAF);
+      ell(cx + side * s(90) - s(14), s(wy) - s(8), s(26), s(12), LEAF_HI);
     }
-    // Canopy at the top.
-    ctx.fillStyle = "#2f7d2f";
-    ctx.beginPath();
-    ctx.ellipse(cx, 110, 180, 90, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // canopy
+    ell(cx, s(100), s(96), s(54), LEAF);
+    ell(cx - s(28), s(86), s(40), s(22), LEAF_HI);
   }
 
-  function drawBananas(ctx, state) {
+  function drawBananas(state) {
     for (const b of state.bananas) {
-      ctx.save();
-      ctx.translate(b.x, b.y + Math.sin(state.time * 2 + b.wobble) * 3);
-      ctx.rotate(-0.5);
-      ctx.fillStyle = "#ffd93b";
-      ctx.strokeStyle = "#c79a13";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(0, 0, b.r, Math.PI * 0.15, Math.PI * 1.05);
-      ctx.arc(2, 2, b.r, Math.PI * 1.05, Math.PI * 0.15, true);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
+      const x = s(b.x), y = s(b.y + Math.sin(state.time * 2 + b.wobble) * 3);
+      // little blocky banana bunch
+      rect(x - 2, y - 3, 2, 1, BANANA);
+      rect(x - 3, y - 1, 5, 2, BANANA);
+      rect(x - 2, y + 1, 4, 1, BANANA_DK);
+      px(x + 1, y - 4, BANANA_DK); // stem
     }
   }
 
-  function drawWater(ctx, camY) {
-    // Only paint if the waterline is anywhere near the current view.
+  function drawWater(camY) {
     if (C.WATER_Y - camY > C.VIEW_H + 40) return;
-    ctx.fillStyle = "rgba(40,110,170,0.85)";
-    ctx.fillRect(0, C.WATER_Y, C.WORLD_W, C.WORLD_H - C.WATER_Y);
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    for (let x = 0; x <= C.WORLD_W; x += 20) {
-      const yy = C.WATER_Y + Math.sin(x * 0.08 + performance.now() * 0.003) * 4;
-      if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+    const wy = s(C.WATER_Y);
+    const bottom = s(C.WORLD_H) + 4; // world floor, in buffer/translated space
+    rect(0, wy, BW, bottom - wy, WATER);
+    // chunky dither
+    bctx.fillStyle = WATER_HI;
+    for (let y = Math.round(wy); y < bottom; y += 2) {
+      for (let x = (y % 4 === 0 ? 0 : 1); x < BW; x += 2) bctx.fillRect(x, y, 1, 1);
     }
-    ctx.stroke();
+    rect(0, wy, BW, 1, "#bfe9ff"); // surface line
   }
 
-  function drawGator(ctx, g) {
-    const y = C.WATER_Y + C.GATOR_Y_OFFSET;
-    const chomping = g.mode === "chomp";
-    ctx.fillStyle = chomping ? "#2e6b2e" : "#357a35";
-    // Body
-    ctx.beginPath();
-    ctx.ellipse(g.x, y, 60, 22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Snout
-    ctx.beginPath();
-    ctx.ellipse(g.x + (g.dir >= 0 ? 55 : -55), y - 4, 34, 14, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Eyes above the surface
-    ctx.fillStyle = "#1f4d1f";
-    ctx.beginPath();
-    ctx.arc(g.x - 18, y - 22, 7, 0, Math.PI * 2);
-    ctx.arc(g.x + 6, y - 22, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.arc(g.x - 18, y - 23, 3, 0, Math.PI * 2);
-    ctx.arc(g.x + 6, y - 23, 3, 0, Math.PI * 2);
-    ctx.fill();
-    if (chomping) {
-      ctx.fillStyle = "#fff";
-      const sx = g.x + (g.dir >= 0 ? 40 : -70);
-      for (let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.moveTo(sx + i * 12, y - 12);
-        ctx.lineTo(sx + i * 12 + 5, y - 2);
-        ctx.lineTo(sx + i * 12 + 10, y - 12);
-        ctx.fill();
-      }
+  function drawGator(g) {
+    const x = s(g.x), y = s(C.WATER_Y + C.GATOR_Y_OFFSET);
+    const chomp = g.mode === "chomp";
+    ell(x, y, s(46), s(15), chomp ? GATOR : GATOR_HI);
+    ell(x + (g.dir >= 0 ? s(30) : -s(30)), y - s(3), s(22), s(10), GATOR);
+    // eyes above the surface
+    const ex = x - s(12);
+    rect(ex, y - s(20), 2, 2, GATOR_DK);
+    rect(ex + s(20), y - s(20), 2, 2, GATOR_DK);
+    px(ex, y - s(20), "#fff"); px(ex + s(20), y - s(20), "#fff");
+    if (chomp) {
+      const tx = x + (g.dir >= 0 ? s(8) : -s(40));
+      for (let i = 0; i < 4; i++) px(tx + i * 3, y - s(8), "#fff");
     }
   }
 
-  function drawSeesaw(ctx, state) {
-    const s = state.seesaw;
-    const up = E.upEnd(s);
-    const dn = E.downEnd(s);
-    // Floating raft fulcrum
-    ctx.fillStyle = "#8a5a2b";
-    ctx.beginPath();
-    ctx.moveTo(s.x - 26, C.SEESAW_Y + 6);
-    ctx.lineTo(s.x + 26, C.SEESAW_Y + 6);
-    ctx.lineTo(s.x + 14, C.SEESAW_Y + 26);
-    ctx.lineTo(s.x - 14, C.SEESAW_Y + 26);
-    ctx.closePath();
-    ctx.fill();
-    // Plank
-    ctx.strokeStyle = "#b9742f";
-    ctx.lineWidth = 12;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(dn.x, dn.y);
-    ctx.lineTo(up.x, up.y);
-    ctx.stroke();
-    // Faint aim guide rising from the catch (up) end
+  function drawSeesaw(state) {
+    const seesaw = state.seesaw;
+    const up = E.upEnd(seesaw), dn = E.downEnd(seesaw);
+    // floating raft
+    rect(s(seesaw.x) - s(22), s(C.SEESAW_Y) + 1, s(44), s(16), WOOD_DK);
+    // plank
+    stroke(s(dn.x), s(dn.y), s(up.x), s(up.y), s(11), WOOD);
+    stroke(s(dn.x), s(dn.y) - 1, s(up.x), s(up.y) - 1, s(4), "#d68f43");
     if (state.phase === "playing") {
-      ctx.strokeStyle = "rgba(255,255,255,0.18)";
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 10]);
-      ctx.beginPath();
-      ctx.moveTo(up.x, up.y);
-      ctx.lineTo(up.x, up.y - 600);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      bctx.strokeStyle = "rgba(255,255,255,0.18)";
+      bctx.lineWidth = 1;
+      bctx.setLineDash([2, 3]);
+      bctx.beginPath();
+      bctx.moveTo(s(up.x), s(up.y));
+      bctx.lineTo(s(up.x), s(up.y) - s(560));
+      bctx.stroke();
+      bctx.setLineDash([]);
     }
   }
 
-  function drawMonkeys(ctx, state) {
-    for (const m of state.monkeys) drawMonkey(ctx, m);
-  }
-
-  function drawMonkey(ctx, m) {
-    ctx.save();
-    ctx.translate(m.x, m.y);
-    if (m.state === "air") ctx.rotate(m.spin);
-    const r = C.MONKEY_R;
-    // Ears
-    ctx.fillStyle = "#7a4a1e";
-    ctx.beginPath();
-    ctx.arc(-r * 0.8, -r * 0.2, r * 0.5, 0, Math.PI * 2);
-    ctx.arc(r * 0.8, -r * 0.2, r * 0.5, 0, Math.PI * 2);
-    ctx.fill();
-    // Body/head
-    ctx.fillStyle = "#8a5a2b";
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fill();
-    // Face
-    ctx.fillStyle = "#e6c79a";
-    ctx.beginPath();
-    ctx.arc(0, r * 0.15, r * 0.6, 0, Math.PI * 2);
-    ctx.fill();
-    // Eyes
-    ctx.fillStyle = "#222";
-    ctx.beginPath();
-    ctx.arc(-r * 0.28, -r * 0.1, 2.6, 0, Math.PI * 2);
-    ctx.arc(r * 0.28, -r * 0.1, 2.6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function drawSplashes(ctx, splashes) {
-    for (const s of splashes) {
-      ctx.globalAlpha = Math.max(0, s.life);
-      ctx.fillStyle = "#cdefff";
-      for (const p of s.parts) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
+  function drawMonkeys(state) {
+    for (let i = 0; i < state.monkeys.length; i++) {
+      const m = state.monkeys[i];
+      drawMonkey(s(m.x), s(m.y), m.state === "air", i === state.airIndex);
     }
   }
 
-  // When the see-saw is below the view, show where it is along the bottom edge.
+  // Full-body monkey: head + ears + body + two arms + two legs + tail.
+  // Airborne -> arms up / legs tucked (reaching). Grounded -> arms & legs down.
+  function drawMonkey(x, y, airborne) {
+    const u = s(C.MONKEY_R); // ~5.5 buffer px base unit
+
+    // tail (curls behind to one side)
+    bctx.strokeStyle = M_DARK; bctx.lineWidth = u * 0.32; bctx.lineCap = "round";
+    bctx.beginPath();
+    bctx.moveTo(x - u * 0.3, y + u * 1.05);
+    bctx.quadraticCurveTo(x - u * 1.4, y + u * 0.9, x - u * 1.25, y - u * 0.1);
+    bctx.stroke();
+
+    // legs
+    bctx.strokeStyle = M_BODY; bctx.lineWidth = u * 0.42; bctx.lineCap = "round";
+    if (airborne) {
+      limb(x - u * 0.25, y + u * 1.0, x - u * 0.7, y + u * 0.35);
+      limb(x + u * 0.25, y + u * 1.0, x + u * 0.7, y + u * 0.35);
+    } else {
+      limb(x - u * 0.3, y + u * 1.0, x - u * 0.4, y + u * 1.7);
+      limb(x + u * 0.3, y + u * 1.0, x + u * 0.4, y + u * 1.7);
+    }
+
+    // arms
+    bctx.lineWidth = u * 0.36;
+    if (airborne) {
+      limb(x - u * 0.5, y + u * 0.05, x - u * 0.95, y - u * 1.25);
+      limb(x + u * 0.5, y + u * 0.05, x + u * 0.95, y - u * 1.25);
+    } else {
+      limb(x - u * 0.5, y + u * 0.1, x - u * 0.95, y + u * 0.8);
+      limb(x + u * 0.5, y + u * 0.1, x + u * 0.95, y + u * 0.8);
+    }
+    // hands
+    circle(airborne ? x - u * 0.95 : x - u * 0.95, airborne ? y - u * 1.25 : y + u * 0.8, u * 0.22, M_DARK);
+    circle(airborne ? x + u * 0.95 : x + u * 0.95, airborne ? y - u * 1.25 : y + u * 0.8, u * 0.22, M_DARK);
+
+    // body
+    ell(x, y + u * 0.5, u * 0.72, u * 0.95, M_BODY);
+
+    // ears
+    circle(x - u * 0.85, y - u * 0.5, u * 0.42, M_DARK);
+    circle(x + u * 0.85, y - u * 0.5, u * 0.42, M_DARK);
+    circle(x - u * 0.85, y - u * 0.5, u * 0.22, M_FACE);
+    circle(x + u * 0.85, y - u * 0.5, u * 0.22, M_FACE);
+
+    // head + face
+    circle(x, y - u * 0.55, u * 0.85, M_BODY);
+    circle(x, y - u * 0.4, u * 0.52, M_FACE);
+
+    // eyes (blocky)
+    rect(x - u * 0.32, y - u * 0.62, 1, 1, M_EYE);
+    rect(x + u * 0.22, y - u * 0.62, 1, 1, M_EYE);
+  }
+  function limb(x1, y1, x2, y2) {
+    bctx.beginPath(); bctx.moveTo(x1, y1); bctx.lineTo(x2, y2); bctx.stroke();
+  }
+
+  function drawSplashes(splashes) {
+    for (const sp of splashes) {
+      bctx.globalAlpha = Math.max(0, sp.life);
+      for (const p of sp.parts) rect(s(p.x), s(p.y), 1, 1, "#cdefff");
+      bctx.globalAlpha = 1;
+    }
+  }
+
+  // ---- crisp overlays on the main canvas ----
   function drawOffscreenIndicator(ctx, state, camY) {
     if (state.phase !== "playing") return;
     if (C.SEESAW_Y - camY <= C.VIEW_H - 10) return;
     const x = state.seesaw.x;
-    ctx.fillStyle = "rgba(255,210,59,0.9)";
+    ctx.fillStyle = "rgba(255,210,59,0.95)";
     ctx.beginPath();
     ctx.moveTo(x - 14, C.VIEW_H - 26);
     ctx.lineTo(x + 14, C.VIEW_H - 26);
@@ -230,38 +243,30 @@ MO.render = (function () {
   }
 
   function drawHUD(ctx, state) {
-    ctx.fillStyle = "#1d3b2a";
-    ctx.font = "bold 30px system-ui, sans-serif";
+    ctx.fillStyle = "#10261a";
+    ctx.font = "bold 30px 'Courier New', monospace";
     ctx.textAlign = "left";
     ctx.fillText(String(state.score), 18, 42);
-    ctx.font = "bold 16px system-ui, sans-serif";
+    ctx.font = "bold 15px 'Courier New', monospace";
     ctx.fillText("BEST " + state.best, 18, 64);
-    // Lives as little monkeys
     ctx.textAlign = "right";
     for (let i = 0; i < state.lives; i++) {
       ctx.fillStyle = "#8a5a2b";
-      ctx.beginPath();
-      ctx.arc(C.VIEW_W - 22 - i * 30, 32, 11, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(C.VIEW_W - 30 - i * 26, 22, 18, 18);
+      ctx.fillStyle = "#f3ddc0";
+      ctx.fillRect(C.VIEW_W - 27 - i * 26, 28, 12, 10);
     }
-    ctx.fillStyle = "#1d3b2a";
-    ctx.font = "bold 16px system-ui, sans-serif";
+    ctx.fillStyle = "#10261a";
+    ctx.font = "bold 15px 'Courier New', monospace";
     ctx.fillText("LV " + state.level, C.VIEW_W - 18, 64);
   }
 
-  // --- tiny color lerp helper ---
   function mix(a, b, t) {
     t = Math.max(0, Math.min(1, t));
     const ca = hex(a), cb = hex(b);
-    const r = Math.round(ca[0] + (cb[0] - ca[0]) * t);
-    const g = Math.round(ca[1] + (cb[1] - ca[1]) * t);
-    const bl = Math.round(ca[2] + (cb[2] - ca[2]) * t);
-    return `rgb(${r},${g},${bl})`;
+    return `rgb(${Math.round(ca[0] + (cb[0] - ca[0]) * t)},${Math.round(ca[1] + (cb[1] - ca[1]) * t)},${Math.round(ca[2] + (cb[2] - ca[2]) * t)})`;
   }
-  function hex(h) {
-    const n = parseInt(h.slice(1), 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
+  function hex(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 
   return { draw, cameraY };
 })();
