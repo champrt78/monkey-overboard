@@ -149,6 +149,15 @@ func _catch_radius_for_level() -> float:
 func _rand_drift() -> float:
 	return randf_range(-1.0, 1.0) * _drift_for_level()
 
+func _make_banana_sprite(x: float, y: float) -> AnimatedSprite2D:
+	var spr := AnimatedSprite2D.new()
+	spr.sprite_frames = BANANA_FRAMES
+	spr.play("default")
+	spr.position = Vector2(x, y - _cam_y)
+	spr.scale = Vector2(0.5, 0.5)
+	_banana_pool.add_child(spr)
+	return spr
+
 func _generate_bananas() -> void:
 	for child in _banana_pool.get_children():
 		child.queue_free()
@@ -173,13 +182,7 @@ func _generate_bananas() -> void:
 				"y": row_y + randf_range(-3.0, 3.0),
 				"wobble": randf() * TAU,
 			}
-			var spr := AnimatedSprite2D.new()
-			spr.sprite_frames = BANANA_FRAMES
-			spr.play("default")
-			spr.position = Vector2(b.x, b.y - _cam_y)
-			spr.scale = Vector2(0.5, 0.5)
-			b["spr"] = spr
-			_banana_pool.add_child(spr)
+			b["spr"] = _make_banana_sprite(b.x, b.y)
 			bananas.append(b)
 
 	# Fill remaining count with scattered trunk bananas
@@ -189,13 +192,7 @@ func _generate_bananas() -> void:
 			"y": BANANA_Y_MIN + randf() * (BANANA_Y_MAX - BANANA_Y_MIN),
 			"wobble": randf() * TAU,
 		}
-		var spr := AnimatedSprite2D.new()
-		spr.sprite_frames = BANANA_FRAMES
-		spr.play("default")
-		spr.position = Vector2(b.x, b.y - _cam_y)
-		spr.scale = Vector2(0.5, 0.5)
-		b["spr"] = spr
-		_banana_pool.add_child(spr)
+		b["spr"] = _make_banana_sprite(b.x, b.y)
 		bananas.append(b)
 
 # ---------- game flow ----------
