@@ -14,7 +14,7 @@ const SEESAW_Y := 700.5     # WATER_Y - 4.5
 const PLANK := 20.5
 const TILT := 11.5
 const CATCH_RX_BASE := 14.0
-const CATCH_RX_MIN := 10.0
+const CATCH_RX_MIN := 8.5
 const MONKEY_R := 5.5
 const GRAV := 225.0
 const LAUNCH_VY := -525.0
@@ -99,6 +99,8 @@ var _selftest := false
 var _selftest_frames := 0
 var _selftest_catches := 0
 
+var _tumble_timer := 0.0
+
 const SAVE_PATH := "user://monkey-overboard.save"
 
 func _ready() -> void:
@@ -134,7 +136,7 @@ func _drift_for_level() -> float:
 	return min(DRIFT_MAX, DRIFT_BASE + DRIFT_PER_LEVEL * (level - 1))
 
 func _catch_radius_for_level() -> float:
-	return max(CATCH_RX_MIN, CATCH_RX_BASE - (level - 1) * 0.5)
+	return max(CATCH_RX_MIN, CATCH_RX_BASE - (level - 1) * 0.75)
 
 func _rand_drift() -> float:
 	return randf_range(-1.0, 1.0) * _drift_for_level()
@@ -271,6 +273,7 @@ func _do_catch(air: Dictionary, ground: Dictionary, up: Vector2) -> void:
 	air.vy = 0.0
 	seesaw.up_side *= -1
 	air_index = 1 - air_index
+	_tumble_timer = 0.25
 	score += POINTS_CATCH
 	_snd_catch.play()
 
@@ -336,7 +339,9 @@ func _update_monkey_sprites() -> void:
 			"ground":
 				spr.play("idle")
 			"air":
-				if m.vy < 0.0:
+				if _tumble_timer > 0.0:
+					spr.play("tumble")
+				elif m.vy < 0.0:
 					spr.play("ascending")
 				else:
 					spr.play("descending")
@@ -378,7 +383,10 @@ func _physics_process(delta: float) -> void:
 	if _selftest and phase == "playing":
 		# Autopilot: snap the raised end under the falling monkey.
 		var a: Dictionary = monkeys[air_index]
-		seesaw.target_x = clamp(a.x - seesaw.up_side * PLANK, PLANK, WORLD_W - PLANK)
+		var up_side: int = seesaw.up_side
+		var auto_min: float = MONKEY_R - up_side * PLANK
+		var auto_max: float = WORLD_W - MONKEY_R - up_side * PLANK
+		seesaw.target_x = clamp(a.x - up_side * PLANK, auto_min, auto_max)
 		seesaw.x = seesaw.target_x
 	if phase == "playing":
 		var sub := 3
@@ -405,6 +413,8 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	time += delta
+	if _tumble_timer > 0.0:
+		_tumble_timer = max(0.0, _tumble_timer - delta)
 	_update_camera()
 	var in_game: bool = (phase == "playing")
 	_mono[0].visible = in_game
@@ -444,7 +454,13 @@ func _on_tap() -> void:
 
 func _on_drag(world_x: float) -> void:
 	if phase == "playing":
-		seesaw.target_x = clamp(world_x, PLANK, WORLD_W - PLANK)
+		# Drag controls the catch (raised) end of the seesaw, not the center,
+		# and the clamp range lets the catch end reach the walls.
+		var up_side: int = seesaw.up_side
+		var target: float = world_x - up_side * PLANK
+		var min_x: float = MONKEY_R - up_side * PLANK
+		var max_x: float = WORLD_W - MONKEY_R - up_side * PLANK
+		seesaw.target_x = clamp(target, min_x, max_x)
 
 # ---------- rendering ----------
 func _draw() -> void:
@@ -455,6 +471,7 @@ func _draw() -> void:
 		_draw_seesaw_base()
 	_draw_hud()
 	if phase == "playing":
+		_draw_catch_guide()
 		_draw_offscreen_indicator()
 
 # world helpers (apply camera offset)
@@ -534,6 +551,20 @@ func _draw_offscreen_indicator() -> void:
 		Vector2(x + 3.5, VIEW_H - 6.5),
 		Vector2(x,       VIEW_H - 2.0),
 	]), col)
+
+func _draw_catch_guide() -> void:
+	if phase != "playing":
+		return
+	var air: Dictionary = monkeys[air_index]
+	if air.state != "air" or air.vy <= 0.0:
+		return
+	var up := _up_end()
+	var y0: float = max(0.0, air.y - _cam_y)
+	var y1: float = min(VIEW_H, up.y - _cam_y)
+	if y1 <= y0:
+		return
+	var col := Color(BANANA.r, BANANA.g, BANANA.b, 0.35)
+	draw_line(Vector2(up.x, y0), Vector2(up.x, y1), col, 0.75)
 
 func _rect_screen(x: float, y: float, w: float, h: float, c: Color) -> void:
 	draw_rect(Rect2(Vector2(x, y), Vector2(w, h)), c)

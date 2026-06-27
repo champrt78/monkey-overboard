@@ -2,22 +2,29 @@
 
 [ext_resource type="Texture2D" path="res://assets/sprites/banana_sheet.png" id="banana_sheet"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_0"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_b0"]
 atlas = ExtResource("banana_sheet")
 region = Rect2(0, 0, 10, 10)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_1"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_b1"]
 atlas = ExtResource("banana_sheet")
 region = Rect2(10, 0, 10, 10)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b2"]
+atlas = ExtResource("banana_sheet")
+region = Rect2(20, 0, 10, 10)
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0")
+"texture": SubResource("AtlasTexture_b0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_1")
+"texture": SubResource("AtlasTexture_b1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b2")
 }],
 "loop": true,
 "name": &"default",
