@@ -29,6 +29,11 @@ const BANANA_Y_MAX := 645.0
 const GATOR_Y_OFFSET := 7.5
 const GATOR_PATROL_SPEED := 14.0
 const GATOR_DASH_SPEED := 190.0
+const GATOR_LUNGE_SPEED := 280.0
+const GATOR_TELEGRAPH_TIME := 0.4
+const GATOR_LUNGE_TIME := 0.5
+const GATOR_RETREAT_SPEED := 20.0
+const GATOR_LUNGE_TRIGGER_Y := 30.0
 const POINTS_BANANA := 10
 const POINTS_CATCH := 2
 const LIVES := 3
@@ -125,7 +130,7 @@ func _make_seesaw() -> Dictionary:
 	return {"x": WORLD_W / 2.0, "target_x": WORLD_W / 2.0, "up_side": 1}
 
 func _make_gator() -> Dictionary:
-	return {"x": WORLD_W / 2.0, "dir": 1, "mode": "patrol", "target_x": WORLD_W / 2.0, "chomp_timer": 0.0}
+	return {"x": WORLD_W / 2.0, "dir": 1, "mode": "patrol", "target_x": WORLD_W / 2.0, "chomp_timer": 0.0, "telegraph_timer": 0.0, "lunge_timer": 0.0}
 
 func _up_end() -> Vector2:
 	return Vector2(seesaw.x + seesaw.up_side * PLANK, SEESAW_Y - TILT)
@@ -295,6 +300,29 @@ func _update_gator(dt: float) -> void:
 			elif gator.x > WORLD_W - 15.0:
 				gator.x = WORLD_W - 15.0
 				gator.dir = -1
+		"telegraph":
+			gator.telegraph_timer -= dt
+			if gator.telegraph_timer <= 0.0:
+				gator.mode = "lunge"
+				gator.lunge_timer = GATOR_LUNGE_TIME
+		"lunge":
+			gator.lunge_timer -= dt
+			var d: float = gator.target_x - gator.x
+			var stepd := GATOR_LUNGE_SPEED * dt
+			if gator.lunge_timer <= 0.0 or abs(d) <= stepd:
+				gator.x = gator.target_x
+				gator.mode = "retreat"
+			else:
+				gator.x += sign(d) * stepd
+		"retreat":
+			var d: float = WORLD_W / 2.0 - gator.x
+			var stepd := GATOR_RETREAT_SPEED * dt
+			if abs(d) <= stepd:
+				gator.x = WORLD_W / 2.0
+				gator.mode = "patrol"
+				gator.dir = 1
+			else:
+				gator.x += sign(d) * stepd
 		"dash":
 			var d: float = gator.target_x - gator.x
 			var stepd := GATOR_DASH_SPEED * dt
@@ -358,12 +386,18 @@ func _update_gator_sprite() -> void:
 	match gator.mode:
 		"patrol":
 			spr.play("patrol")
+		"telegraph":
+			spr.play("alert")
+		"lunge":
+			spr.play("chomp")
+		"retreat":
+			spr.play("patrol")
 		"dash":
 			spr.play("alert")
 		"chomp":
 			spr.play("chomp")
 	var face_dir: int = gator.dir
-	if gator.mode == "dash" or gator.mode == "chomp":
+	if gator.mode == "telegraph" or gator.mode == "lunge" or gator.mode == "dash" or gator.mode == "chomp":
 		var d: float = gator.target_x - gator.x
 		if d != 0.0:
 			face_dir = int(sign(d))
@@ -406,6 +440,13 @@ func _physics_process(delta: float) -> void:
 				_next_level()
 			if phase != "playing":
 				break
+		# Active gator: visual threat only, triggered once per frame.
+		if gator.mode == "patrol":
+			var air: Dictionary = monkeys[air_index]
+			if air.state == "air" and air.vy > 0.0 and air.y > WATER_Y - GATOR_LUNGE_TRIGGER_Y:
+				gator.mode = "telegraph"
+				gator.telegraph_timer = GATOR_TELEGRAPH_TIME
+				gator.target_x = clamp(air.x, 15.0, WORLD_W - 15.0)
 	else:
 		_update_gator(delta)
 	if _selftest:
@@ -570,6 +611,17 @@ func _draw_catch_guide() -> void:
 func _rect_screen(x: float, y: float, w: float, h: float, c: Color) -> void:
 	draw_rect(Rect2(Vector2(x, y), Vector2(w, h)), c)
 
+func _commas(n: int) -> String:
+	var s := str(n)
+	var out := ""
+	var k := 0
+	for i in range(s.length() - 1, -1, -1):
+		if k > 0 and k % 3 == 0:
+			out = "," + out
+		out = s[i] + out
+		k += 1
+	return out
+
 func _draw_overlay_on(c: CanvasItem) -> void:
 	c.draw_rect(Rect2(Vector2(0, 0), Vector2(VIEW_W, VIEW_H)), Color(0.03, 0.10, 0.07, 0.55))
 	if phase == "menu":
@@ -578,11 +630,13 @@ func _draw_overlay_on(c: CanvasItem) -> void:
 		c.draw_string(_font, Vector2(0, VIEW_H * 0.55), "Catch the monkey.", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 8, Color.WHITE)
 		c.draw_string(_font, Vector2(0, VIEW_H * 0.55 + 11), "Grab bananas. Mind the gator.", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 7, Color.WHITE)
 		c.draw_string(_font, Vector2(0, VIEW_H * 0.70), "Tap to start", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 11, Color.WHITE)
+		if best > 0:
+			c.draw_string(_font, Vector2(0, VIEW_H * 0.80), "BEST  " + _commas(best), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 8, BANANA)
 	else:
-		c.draw_string(_font, Vector2(0, VIEW_H * 0.38), "GAME OVER", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 16, Color.WHITE)
-		c.draw_string(_font, Vector2(0, VIEW_H * 0.50), "Score " + str(score), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
-		c.draw_string(_font, Vector2(0, VIEW_H * 0.50 + 13), "Best " + str(best), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
-		c.draw_string(_font, Vector2(0, VIEW_H * 0.66), "Tap to play again", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 9, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.28), "GAME OVER", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 16, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.72), "Score " + _commas(score), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.80), "Best " + _commas(best), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.90), "Tap to play again", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 9, Color.WHITE)
 
 # ---------- persistence ----------
 func _save_best() -> void:

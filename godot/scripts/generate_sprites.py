@@ -4,6 +4,8 @@ import os
 import sys
 from pathlib import Path
 from io import BytesIO
+import numpy as np
+import scipy.ndimage as ndi
 from google import genai
 from google.genai import types
 from PIL import Image
@@ -16,18 +18,52 @@ api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     sys.exit("ERROR: GEMINI_API_KEY not set")
 client = genai.Client(api_key=api_key)
-MODEL = "models/gemini-3-pro-image-preview"
-REF_IMAGE = Path("C:/Users/Ray/Kimi-Repos/mulletdown/docs/mockups/screens/title_plate.png")
+MODEL = "models/gemini-3.1-flash-image"
+MULLET_REF = Path("C:/Users/Ray/Kimi-Repos/mulletdown/docs/mockups/screens/title_plate.png")
+JUNGLE_REF = Path("C:/Users/Ray/kimi-repos/monkey-overboard/godot/assets/backgrounds/jungle_bg.png")
 
 
 def _load_ref(path: Path):
     return types.Part.from_bytes(data=path.read_bytes(), mime_type="image/png")
 
 
+def _remove_bg(img: Image.Image) -> Image.Image:
+    """Remove gray/checkerboard backgrounds baked into RGB by Gemini.
+
+    Treats desaturated (<40) or very bright/near-white (>245) pixels as
+    background, labels connected components, and zeroes out any component
+    touching an image border. Keeps interior sprite art intact.
+    """
+    arr = np.array(img.convert("RGBA"))
+    rgb = arr[:, :, :3]
+    alpha = arr[:, :, 3]
+
+    maxc = rgb.max(axis=2)
+    minc = rgb.min(axis=2)
+    desat = maxc - minc
+
+    # Background seed: gray-ish or near-white/bright regions.
+    # Threshold 245 preserves bright saturated sprite colors (e.g. yellow banana)
+    # while still catching near-white/very-light-gray background mats.
+    bg = (desat < 40) | (maxc > 245)
+
+    labels, _ = ndi.label(bg)
+    h, w = labels.shape
+    border = np.concatenate([labels[0, :], labels[-1, :], labels[:, 0], labels[:, -1]])
+    border_labels = set(np.unique(border))
+    border_labels.discard(0)
+
+    if border_labels:
+        remove_mask = np.isin(labels, list(border_labels))
+        alpha[remove_mask] = 0
+
+    return Image.fromarray(arr, "RGBA")
+
+
 def generate(name: str, prompt: str, final_wh: tuple, gen_wh: tuple):
     out = OUT_DIR / name
     print(f"Generating {name} ...")
-    parts = [prompt, _load_ref(REF_IMAGE)]
+    parts = [prompt, _load_ref(MULLET_REF), _load_ref(JUNGLE_REF)]
     response = client.models.generate_content(model=MODEL, contents=parts)
     for part in response.candidates[0].content.parts:
         if hasattr(part, "inline_data") and part.inline_data and part.inline_data.data:
@@ -37,16 +73,8 @@ def generate(name: str, prompt: str, final_wh: tuple, gen_wh: tuple):
                 img = img.resize(gen_wh, Image.LANCZOS)
             if gen_wh != final_wh:
                 img = img.resize(final_wh, Image.NEAREST)
-            # Make sure pure-white backgrounds are transparent.
-            datas = img.getdata()
-            new_data = []
-            for item in datas:
-                r, g, b, a = item
-                if a > 0 and r > 245 and g > 245 and b > 245:
-                    new_data.append((255, 255, 255, 0))
-                else:
-                    new_data.append(item)
-            img.putdata(new_data)
+            # Remove baked-in gray/checkerboard background, keep sprite art.
+            img = _remove_bg(img)
             img.save(out, "PNG")
             print(f"  Saved {out.name} at {img.size}")
             return
@@ -60,55 +88,67 @@ def generate(name: str, prompt: str, final_wh: tuple, gen_wh: tuple):
 SPRITES = [
     (
         "monkey_sheet.png",
-        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
-        "A cartoon jungle monkey, 8 frames in one horizontal row, final size 224x28 pixels (each frame 28x28). "
-        "Transparent background, NO white mat, NO background, thick black outline, strong cel-shading, warm jungle palette. "
+        "High quality detailed pixel art sprite sheet matching BOTH reference images. "
+        "A heroic cartoon jungle monkey in the same detailed modern-retro pixel art style as the jungle background. "
+        "8 frames in one horizontal row, final size 224x28 pixels (each frame 28x28). "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "Thick black outline, strong cel-shading with 3 tones, warm brown/tan fur, expressive face, clear limbs. "
         "Frame 0-1: idle standing. Frame 2-3: ascending with arms reaching up. "
         "Frame 4-5: descending with arms tucked. Frame 6-7: tumbling spin. "
-        "Side-view 2D game sprite, modern retro pixel art, expressive face, clear limbs.",
+        "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
         (224, 28),
         (896, 112),
     ),
     (
         "gator_sheet.png",
-        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
-        "A cartoon alligator, 5 frames in one horizontal row, final size 320x24 pixels (each frame 64x24). "
-        "Transparent background, NO white mat, NO background, thick black outline, strong cel-shading, jungle green palette. "
+        "High quality detailed pixel art sprite sheet matching BOTH reference images. "
+        "A cartoon alligator in the same detailed modern-retro pixel art style as the jungle background. "
+        "5 frames in one horizontal row, final size 320x24 pixels (each frame 64x24). "
+        "Completely transparent background, NO mat, NO background color, NO checkerboard, NO gray border, PURE SOLID WHITE BACKGROUND #FFFFFF is also acceptable. "
+        "Thick black outline, strong cel-shading, jungle green scales, expressive yellow eyes, white teeth. "
         "Frame 0-1: patrol swimming. Frame 2: alert rearing up. Frame 3-4: chomp with jaws wide. "
-        "Side-view 2D game sprite, modern retro pixel art, expressive yellow eyes, white teeth.",
+        "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
         (320, 24),
         (1280, 96),
     ),
     (
         "banana_sheet.png",
-        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
-        "A bright yellow banana, 3 frames in one horizontal row, final size 60x20 pixels (each frame 20x20). "
-        "Transparent background, NO white mat, NO background, thick black outline, slight wobble/shimmer. "
-        "Side-view 2D game sprite, modern retro pixel art.",
+        "High quality detailed pixel art sprite sheet matching BOTH reference images. "
+        "A bright yellow banana in the same detailed modern-retro pixel art style as the jungle background. "
+        "3 frames in one horizontal row, final size 60x20 pixels (each frame 20x20). "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "Thick black outline, slight wobble/shimmer, small highlight. "
+        "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
         (60, 20),
         (240, 80),
     ),
     (
         "splash_sheet.png",
-        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
-        "A water splash, 5 frames in one horizontal row, final size 160x32 pixels (each frame 32x32). "
-        "Transparent background, NO white mat, NO background, blue and white, impact to dissipate. "
-        "Side-view 2D game sprite, modern retro pixel art.",
+        "High quality detailed pixel art sprite sheet matching BOTH reference images. "
+        "A water splash in the same detailed modern-retro pixel art style as the jungle background. "
+        "5 frames in one horizontal row, final size 160x32 pixels (each frame 32x32). "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "Blue and white water, impact to peak spray to dissipate. "
+        "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
         (160, 32),
         (640, 128),
     ),
     (
         "seesaw_plank.png",
-        "High quality detailed pixel art wooden seesaw plank in the exact style of the reference image. "
+        "High quality detailed pixel art wooden seesaw plank matching BOTH reference images. "
         "Single frame, final size 88x12 pixels. "
-        "Transparent background, NO white mat, NO background, brown wood grain with darker ends, metal fulcrum hint. "
-        "Modern retro pixel art.",
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "Brown wood grain with darker ends, metal fulcrum hint, strong cel-shading. "
+        "Modern retro pixel art, cohesive with the lush jungle plate.",
         (88, 12),
         (352, 48),
     ),
 ]
 
+_target = sys.argv[1] if len(sys.argv) > 1 else None
 for name, prompt, final_size, gen_size in SPRITES:
+    if _target and name != _target:
+        continue
     generate(name, prompt, final_size, gen_size)
 
 print("Done.")

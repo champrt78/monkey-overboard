@@ -1,22 +1,28 @@
 # TODO - Monkey Overboard
 
 ## Now
-- [ ] Phase 6: Polish (level banner, screen shake, score pop) — waiting on real-device playtest feedback, or user go-ahead to proceed without device test.
+- [ ] Phase 6: Polish (level banner, screen shake, score pop).
+- [ ] Phase 5b: Real-device Android playtest.
 
-## Next (in kimi-monkey-game.txt phases)
+## Next
+- [ ] Pause menu / back-to-menu from game over.
+- [ ] High-score leaderboard screen.
+
+## Completed (kept for reference)
 - [x] Phase 0: Visual baseline — run in editor, screenshot all 3 screens, verify drag input coordinate mapping
 - [x] Phase 1: Title + game-over art via Gemini
 - [x] Phase 2: Press Start 2P pixel font
 - [x] Phase 3: Off-screen seesaw indicator
 - [x] Phase 4: SFX — 6 sounds (launch/catch/banana/splash/chomp/life-lost)
 - [x] Phase 5: Android packaging + signed debug APK export
-- [ ] Phase 5b: Real-device playtest
-- [ ] Phase 6: Polish (level banner, screen shake, score pop)
+- [x] 2026-06-26 - Sprite sheets regenerated with transparent backgrounds.
+- [x] 2026-06-26 - Active gator v1.1 (`patrol -> telegraph -> lunge -> retreat`) implemented.
+- [x] 2026-06-26 - Title best score + game-over stats polish.
+- [x] 2026-06-26 - Difficulty/QA review; selftest passes.
 
 ## Later / Ideas
-- [ ] **v1.1 active gator**: `lurk -> telegraph -> lunge -> retreat` state machine, leaps at low monkeys on higher levels. Designed in the spec, gator module is deliberately self-contained to make this drop-in. Currently passive (patrol/dash/chomp).
-- [ ] Optional: point the off-screen chevron at the see-saw's **up end** (`seesaw.x + up_side*PLANK`) instead of the fulcrum, and/or add the specced faint vertical guide line at the catch end (never built in either version).
-- [ ] Sprite art Phase 5+: AnimatedSprite2D integration over the procedural draw calls (see kimi-monkey-overboard.txt Phase 3).
+- [ ] Optional: point the off-screen chevron at the see-saw's **up end** (`seesaw.x + up_side*PLANK`) instead of the fulcrum.
+- [ ] Sprite art Phase 5+: further AnimatedSprite2D polish over procedural draw calls.
 
 ## Blocked
 - Real-device Android playtest: no Android device or `adb` access in this environment.
