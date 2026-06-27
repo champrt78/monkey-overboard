@@ -90,6 +90,9 @@ var _cam_y := 0.0
 @onready var _snd_chomp: AudioStreamPlayer = $SndChomp
 @onready var _snd_life_lost: AudioStreamPlayer = $SndLifeLost
 
+@onready var _title_bg: TextureRect = $TitleBG
+@onready var _gameover_bg: TextureRect = $GameoverBG
+
 # Headless self-test (run with `--headless --mo-selftest`): autopilots the
 # see-saw so the catch/flip loop runs with no display, then reports + quits.
 var _selftest := false
@@ -100,7 +103,8 @@ const SAVE_PATH := "user://monkey-overboard.save"
 
 func _ready() -> void:
 	randomize()
-	_font = ThemeDB.fallback_font
+	var loaded := load("res://assets/fonts/PressStart2P-Regular.ttf")
+	_font = loaded if loaded else ThemeDB.fallback_font
 	_load_best()
 	monkeys = [_make_monkey("ground"), _make_monkey("air")]
 	seesaw = _make_seesaw()
@@ -328,7 +332,6 @@ func _update_monkey_sprites() -> void:
 		var m: Dictionary = monkeys[i]
 		var spr: AnimatedSprite2D = _mono[i]
 		spr.position = Vector2(m.x, m.y - _cam_y)
-		spr.visible = true
 		match m.state:
 			"ground":
 				spr.play("idle")
@@ -343,7 +346,6 @@ func _update_monkey_sprites() -> void:
 func _update_gator_sprite() -> void:
 	var spr: AnimatedSprite2D = _gator_spr
 	spr.position = Vector2(gator.x, WATER_Y + GATOR_Y_OFFSET - _cam_y)
-	spr.visible = true
 	match gator.mode:
 		"patrol":
 			spr.play("patrol")
@@ -404,11 +406,22 @@ func _physics_process(delta: float) -> void:
 func _process(delta: float) -> void:
 	time += delta
 	_update_camera()
-	_update_monkey_sprites()
-	_update_gator_sprite()
-	_update_seesaw_sprite()
-	_update_banana_sprites()
+	var in_game: bool = (phase == "playing")
+	_mono[0].visible = in_game
+	_mono[1].visible = in_game
+	_gator_spr.visible = in_game
+	_seesaw_spr.visible = in_game
+	_banana_pool.visible = in_game
+	_splash_pool.visible = in_game
+	if in_game:
+		_update_monkey_sprites()
+		_update_gator_sprite()
+		_update_seesaw_sprite()
+		_update_banana_sprites()
+	_title_bg.visible = (phase == "menu")
+	_gameover_bg.visible = (phase == "gameover")
 	queue_redraw()
+	$Overlay.queue_redraw()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
@@ -435,14 +448,14 @@ func _on_drag(world_x: float) -> void:
 
 # ---------- rendering ----------
 func _draw() -> void:
-	_draw_sky()
-	_draw_tree()
-	_draw_water()
-	_draw_seesaw_base()
+	if phase == "playing":
+		_draw_sky()
+		_draw_tree()
+		_draw_water()
+		_draw_seesaw_base()
 	_draw_hud()
-	_draw_offscreen_indicator()
-	if phase != "playing":
-		_draw_overlay()
+	if phase == "playing":
+		_draw_offscreen_indicator()
 
 # world helpers (apply camera offset)
 func _wy(y: float) -> float:
@@ -525,19 +538,19 @@ func _draw_offscreen_indicator() -> void:
 func _rect_screen(x: float, y: float, w: float, h: float, c: Color) -> void:
 	draw_rect(Rect2(Vector2(x, y), Vector2(w, h)), c)
 
-func _draw_overlay() -> void:
-	draw_rect(Rect2(Vector2(0, 0), Vector2(VIEW_W, VIEW_H)), Color(0.03, 0.10, 0.07, 0.55))
+func _draw_overlay_on(c: CanvasItem) -> void:
+	c.draw_rect(Rect2(Vector2(0, 0), Vector2(VIEW_W, VIEW_H)), Color(0.03, 0.10, 0.07, 0.55))
 	if phase == "menu":
-		draw_string(_font, Vector2(0, VIEW_H * 0.34), "MONKEY", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 18, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.34 + 18), "OVERBOARD", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 18, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.55), "Catch the monkey.", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 8, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.55 + 11), "Grab bananas. Mind the gator.", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 7, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.70), "Tap to start", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 11, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.34), "MONKEY", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 18, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.34 + 18), "OVERBOARD", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 18, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.55), "Catch the monkey.", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 8, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.55 + 11), "Grab bananas. Mind the gator.", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 7, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.70), "Tap to start", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 11, Color.WHITE)
 	else:
-		draw_string(_font, Vector2(0, VIEW_H * 0.38), "GAME OVER", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 16, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.50), "Score " + str(score), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.50 + 13), "Best " + str(best), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
-		draw_string(_font, Vector2(0, VIEW_H * 0.66), "Tap to play again", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 9, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.38), "GAME OVER", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 16, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.50), "Score " + str(score), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.50 + 13), "Best " + str(best), HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 10, Color.WHITE)
+		c.draw_string(_font, Vector2(0, VIEW_H * 0.66), "Tap to play again", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 9, Color.WHITE)
 
 # ---------- persistence ----------
 func _save_best() -> void:
