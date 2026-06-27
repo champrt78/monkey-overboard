@@ -22,10 +22,10 @@ const DRIFT_BASE := 24.0
 const DRIFT_PER_LEVEL := 4.5
 const DRIFT_MAX := 57.0
 const BANANA_R := 4.0
-const BANANA_BASE := 24
-const BANANA_PER_LEVEL := 6
-const BANANA_Y_MIN := 60.0
-const BANANA_Y_MAX := 620.0
+const BANANA_BASE := 48
+const BANANA_PER_LEVEL := 12
+const BANANA_Y_MIN := 40.0
+const BANANA_Y_MAX := 640.0
 const GATOR_Y_OFFSET := 7.5
 const GATOR_PATROL_SPEED := 14.0
 const GATOR_DASH_SPEED := 190.0
@@ -163,7 +163,7 @@ func _generate_bananas() -> void:
 	bananas = []
 	var count := BANANA_BASE + BANANA_PER_LEVEL * (level - 1)
 
-	var bunch_count: int = maxi(4, count / 4)
+	var bunch_count: int = maxi(6, count / 3)
 	var row_step: float = (BANANA_Y_MAX - BANANA_Y_MIN) / float(bunch_count)
 	var margin := 14.0
 
@@ -172,7 +172,7 @@ func _generate_bananas() -> void:
 		var side := 1 if randf() > 0.5 else -1
 		var branch_x := WORLD_W * 0.5 + side * (18.0 + randf() * 22.0)
 		var remaining := count - bananas.size()
-		var bunch_size := mini(3 + (randi() % 3), remaining)
+		var bunch_size := mini(4 + (randi() % 4), remaining)  # 4-7 bananas per bunch
 		if bunch_size <= 0:
 			break
 		for j in bunch_size:
