@@ -45,12 +45,12 @@ stretch_mode = 0
 expand_mode = 1
 
 [node name="Monkey0" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(1.0, 1.0)
 sprite_frames = ExtResource("4_monkey_frames")
 animation = &"idle"
 
 [node name="Monkey1" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(1.0, 1.0)
 sprite_frames = ExtResource("4_monkey_frames")
 animation = &"idle"
 
