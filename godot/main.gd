@@ -90,6 +90,7 @@ var _cam_y := 0.0
 @onready var _snd_chomp: AudioStreamPlayer = $SndChomp
 @onready var _snd_life_lost: AudioStreamPlayer = $SndLifeLost
 
+@onready var _jungle_bg: Sprite2D = $JungleBG
 @onready var _title_bg: TextureRect = $TitleBG
 @onready var _gameover_bg: TextureRect = $GameoverBG
 
@@ -157,6 +158,7 @@ func _generate_bananas() -> void:
 		spr.sprite_frames = BANANA_FRAMES
 		spr.play("default")
 		spr.position = Vector2(b.x, b.y - _cam_y)
+		spr.scale = Vector2(0.5, 0.5)
 		b["spr"] = spr
 		_banana_pool.add_child(spr)
 		bananas.append(b)
@@ -313,6 +315,7 @@ func _spawn_splash(x: float, y: float) -> void:
 	var spr := AnimatedSprite2D.new()
 	spr.sprite_frames = SPLASH_FRAMES
 	spr.position = Vector2(x, y - _cam_y)
+	spr.scale = Vector2(0.5, 0.5)
 	spr.animation_finished.connect(_on_splash_finished.bind(spr))
 	spr.play("default")
 	_splash_pool.add_child(spr)
@@ -328,6 +331,7 @@ func _update_camera() -> void:
 	if phase == "playing" or phase == "gameover":
 		var air: Dictionary = monkeys[air_index]
 		_cam_y = clamp(air.y - VIEW_H * 0.45, 0.0, WORLD_H - VIEW_H)
+	_jungle_bg.position = Vector2(0, -_cam_y)
 
 
 func _update_monkey_sprites() -> void:
@@ -465,9 +469,6 @@ func _on_drag(world_x: float) -> void:
 # ---------- rendering ----------
 func _draw() -> void:
 	if phase == "playing":
-		_draw_sky()
-		_draw_tree()
-		_draw_water()
 		_draw_seesaw_base()
 	_draw_hud()
 	if phase == "playing":

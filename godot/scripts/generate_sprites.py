@@ -53,56 +53,58 @@ def generate(name: str, prompt: str, final_wh: tuple, gen_wh: tuple):
     print(f"  WARNING: no image returned for {name}")
 
 
-# Frame sizes are kept identical to the current sheets so no scene scaling is needed.
-# Each frame is generated at 4x then downscaled with nearest-neighbor.
+# Sprites are generated at 4x final resolution then downscaled with nearest-neighbor.
+# Final frame sizes are doubled from the original 14x14-era sprites; the scene scales
+# the AnimatedSprite2D nodes to 0.5 so they keep the same world proportions while
+# looking crisp at higher resolution.
 SPRITES = [
     (
         "monkey_sheet.png",
-        "Pixel art sprite sheet in the style of the reference image. A cartoon jungle monkey, "
-        "8 frames in one horizontal row, final size 112x14 pixels (each frame 14x14). "
-        "Transparent background, NO white mat, thick black outline, cel-shaded, warm jungle palette. "
+        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
+        "A cartoon jungle monkey, 8 frames in one horizontal row, final size 224x28 pixels (each frame 28x28). "
+        "Transparent background, NO white mat, NO background, thick black outline, strong cel-shading, warm jungle palette. "
         "Frame 0-1: idle standing. Frame 2-3: ascending with arms reaching up. "
         "Frame 4-5: descending with arms tucked. Frame 6-7: tumbling spin. "
-        "Side-view 2D game sprite, modern retro pixel art.",
-        (112, 14),
-        (448, 56),
+        "Side-view 2D game sprite, modern retro pixel art, expressive face, clear limbs.",
+        (224, 28),
+        (896, 112),
     ),
     (
         "gator_sheet.png",
-        "Pixel art sprite sheet in the style of the reference image. A cartoon alligator, "
-        "5 frames in one horizontal row, final size 160x12 pixels (each frame 32x12). "
-        "Transparent background, NO white mat, thick black outline, cel-shaded, jungle green palette. "
+        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
+        "A cartoon alligator, 5 frames in one horizontal row, final size 320x24 pixels (each frame 64x24). "
+        "Transparent background, NO white mat, NO background, thick black outline, strong cel-shading, jungle green palette. "
         "Frame 0-1: patrol swimming. Frame 2: alert rearing up. Frame 3-4: chomp with jaws wide. "
-        "Side-view 2D game sprite, modern retro pixel art.",
-        (160, 12),
-        (640, 48),
+        "Side-view 2D game sprite, modern retro pixel art, expressive yellow eyes, white teeth.",
+        (320, 24),
+        (1280, 96),
     ),
     (
         "banana_sheet.png",
-        "Pixel art sprite sheet in the style of the reference image. A bright yellow banana, "
-        "3 frames in one horizontal row, final size 30x10 pixels (each frame 10x10). "
-        "Transparent background, NO white mat, thick black outline, slight wobble/shimmer. "
+        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
+        "A bright yellow banana, 3 frames in one horizontal row, final size 60x20 pixels (each frame 20x20). "
+        "Transparent background, NO white mat, NO background, thick black outline, slight wobble/shimmer. "
         "Side-view 2D game sprite, modern retro pixel art.",
-        (30, 10),
-        (120, 40),
+        (60, 20),
+        (240, 80),
     ),
     (
         "splash_sheet.png",
-        "Pixel art sprite sheet in the style of the reference image. A water splash, "
-        "5 frames in one horizontal row, final size 80x16 pixels (each frame 16x16). "
-        "Transparent background, NO white mat, blue and white, impact to dissipate. "
+        "High quality detailed pixel art sprite sheet in the exact style of the reference image. "
+        "A water splash, 5 frames in one horizontal row, final size 160x32 pixels (each frame 32x32). "
+        "Transparent background, NO white mat, NO background, blue and white, impact to dissipate. "
         "Side-view 2D game sprite, modern retro pixel art.",
-        (80, 16),
-        (320, 64),
+        (160, 32),
+        (640, 128),
     ),
     (
         "seesaw_plank.png",
-        "Pixel art wooden seesaw plank in the style of the reference image. "
-        "Single frame, final size 44x6 pixels. "
-        "Transparent background, NO white mat, brown wood grain with darker ends. "
+        "High quality detailed pixel art wooden seesaw plank in the exact style of the reference image. "
+        "Single frame, final size 88x12 pixels. "
+        "Transparent background, NO white mat, NO background, brown wood grain with darker ends, metal fulcrum hint. "
         "Modern retro pixel art.",
-        (44, 6),
-        (176, 24),
+        (88, 12),
+        (352, 48),
     ),
 ]
 

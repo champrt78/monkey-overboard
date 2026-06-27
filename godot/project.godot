@@ -16,6 +16,8 @@ config/icon="res://assets/icon.png"
 
 window/size/viewport_width=135
 window/size/viewport_height=240
+window/size/window_width_override=540
+window/size/window_height_override=960
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 window/handheld/orientation="portrait"

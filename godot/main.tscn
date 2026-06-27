@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://main.gd" id="1_monkey_overboard_main"]
 [ext_resource type="Texture2D" path="res://assets/screens/title_plate.png" id="2_title_plate"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/jungle_bg.png" id="2a_jungle_bg"]
 [ext_resource type="Texture2D" path="res://assets/screens/gameover_plate.png" id="3_gameover_plate"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/monkey_frames.tres" id="4_monkey_frames"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/gator_frames.tres" id="5_gator_frames"]
@@ -18,6 +19,10 @@
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_monkey_overboard_main")
+
+[node name="JungleBG" type="Sprite2D" parent="."]
+texture = ExtResource("2a_jungle_bg")
+centered = false
 
 [node name="TitleBG" type="TextureRect" parent="."]
 layout_mode = 0
@@ -40,18 +45,22 @@ stretch_mode = 0
 expand_mode = 1
 
 [node name="Monkey0" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
 sprite_frames = ExtResource("4_monkey_frames")
 animation = &"idle"
 
 [node name="Monkey1" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
 sprite_frames = ExtResource("4_monkey_frames")
 animation = &"idle"
 
 [node name="Gator" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
 sprite_frames = ExtResource("5_gator_frames")
 animation = &"patrol"
 
 [node name="Seesaw" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("8_seesaw_plank")
 
 [node name="BananaPool" type="Node2D" parent="."]
