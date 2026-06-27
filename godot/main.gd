@@ -163,7 +163,10 @@ func _generate_bananas() -> void:
 		var row_y: float = BANANA_Y_MIN + i * row_step + randf() * row_step * 0.5
 		var side := 1 if randf() > 0.5 else -1
 		var branch_x := WORLD_W * 0.5 + side * (18.0 + randf() * 22.0)
-		var bunch_size := 3 + (randi() % 3)  # 3-5 bananas per bunch
+		var remaining := count - bananas.size()
+		var bunch_size := mini(3 + (randi() % 3), remaining)
+		if bunch_size <= 0:
+			break
 		for j in bunch_size:
 			var b := {
 				"x": clamp(branch_x + (j - bunch_size * 0.5) * 5.0 + randf_range(-2.0, 2.0), margin, WORLD_W - margin),
