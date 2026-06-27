@@ -22,10 +22,10 @@ const DRIFT_BASE := 24.0
 const DRIFT_PER_LEVEL := 4.5
 const DRIFT_MAX := 57.0
 const BANANA_R := 4.0
-const BANANA_BASE := 12
-const BANANA_PER_LEVEL := 3
-const BANANA_Y_MIN := 108.0
-const BANANA_Y_MAX := 645.0
+const BANANA_BASE := 24
+const BANANA_PER_LEVEL := 6
+const BANANA_Y_MIN := 60.0
+const BANANA_Y_MAX := 620.0
 const GATOR_Y_OFFSET := 7.5
 const GATOR_PATROL_SPEED := 14.0
 const GATOR_DASH_SPEED := 190.0
@@ -154,10 +154,35 @@ func _generate_bananas() -> void:
 		child.queue_free()
 	bananas = []
 	var count := BANANA_BASE + BANANA_PER_LEVEL * (level - 1)
-	var margin := 12.0
-	for i in count:
+
+	var bunch_count: int = maxi(4, count / 4)
+	var row_step: float = (BANANA_Y_MAX - BANANA_Y_MIN) / float(bunch_count)
+	var margin := 14.0
+
+	for i in bunch_count:
+		var row_y: float = BANANA_Y_MIN + i * row_step + randf() * row_step * 0.5
+		var side := 1 if randf() > 0.5 else -1
+		var branch_x := WORLD_W * 0.5 + side * (18.0 + randf() * 22.0)
+		var bunch_size := 3 + (randi() % 3)  # 3-5 bananas per bunch
+		for j in bunch_size:
+			var b := {
+				"x": clamp(branch_x + (j - bunch_size * 0.5) * 5.0 + randf_range(-2.0, 2.0), margin, WORLD_W - margin),
+				"y": row_y + randf_range(-3.0, 3.0),
+				"wobble": randf() * TAU,
+			}
+			var spr := AnimatedSprite2D.new()
+			spr.sprite_frames = BANANA_FRAMES
+			spr.play("default")
+			spr.position = Vector2(b.x, b.y - _cam_y)
+			spr.scale = Vector2(0.5, 0.5)
+			b["spr"] = spr
+			_banana_pool.add_child(spr)
+			bananas.append(b)
+
+	# Fill remaining count with scattered trunk bananas
+	while bananas.size() < count:
 		var b := {
-			"x": margin + randf() * (WORLD_W - margin * 2.0),
+			"x": clamp(WORLD_W * 0.5 + randf_range(-8.0, 8.0), margin, WORLD_W - margin),
 			"y": BANANA_Y_MIN + randf() * (BANANA_Y_MAX - BANANA_Y_MIN),
 			"wobble": randf() * TAU,
 		}
