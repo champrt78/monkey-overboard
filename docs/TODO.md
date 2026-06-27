@@ -19,6 +19,7 @@
 - [x] 2026-06-26 - Active gator v1.1 (`patrol -> telegraph -> lunge -> retreat`) implemented.
 - [x] 2026-06-26 - Title best score + game-over stats polish.
 - [x] 2026-06-26 - Difficulty/QA review; selftest passes.
+- [x] 2026-06-27 - 1:1 pixel-scale sprite overhaul, camera overshoot/indicator, keyboard seesaw control, banana bunches; selftest passes; debug APK rebuilt.
 
 ## Later / Ideas
 - [ ] Optional: point the off-screen chevron at the see-saw's **up end** (`seesaw.x + up_side*PLANK`) instead of the fulcrum.

@@ -1,7 +1,7 @@
 # Project State - Monkey Overboard
 
 ## Current State
-- **2026-06-26** — Overnight sprint complete: all 5 sprite sheets regenerated with transparent backgrounds, active gator v1.1 implemented, title/game-over overlay polish landed, and difficulty/QA reviewed. Headless self-test passes (`catches=4, phase=playing`). Session notes in `docs/sessions/Session_2026-06-26.md`.
+- **2026-06-27** — 1:1 pixel-scale sprite overhaul committed: all sprites map one source pixel to one viewport pixel, physics constants resynced, camera frames the seesaw with bottom overshoot, keyboard control + indicator restored, and bananas spawn in larger bunches. Headless self-test passes cleanly (`catches=4, phase=playing`). Signed debug APK at `builds/monkey-overboard-debug.apk`. Session notes in `docs/sessions/Session_2026-06-27.md`.
 
 ## Wins & Milestones
 - **2026-06-23** - v1 web prototype built and playtested (vanilla JS + Canvas, deploys to GitHub Pages): full catch/flip/banana/miss/gator loop, pixel-art reskin, 3-screen-tall vertically-panning world. Design approved and v1 scope locked (`docs/superpowers/specs/2026-06-23-monkey-overboard-design.md`).
