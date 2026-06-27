@@ -33,6 +33,12 @@ const POINTS_BANANA := 10
 const POINTS_CATCH := 2
 const LIVES := 3
 
+const MONKEY_FRAMES := preload("res://assets/sprites/monkey_frames.tres")
+const GATOR_FRAMES := preload("res://assets/sprites/gator_frames.tres")
+const BANANA_FRAMES := preload("res://assets/sprites/banana_frames.tres")
+const SPLASH_FRAMES := preload("res://assets/sprites/splash_frames.tres")
+const SEESAW_TEX := preload("res://assets/sprites/seesaw_plank.png")
+
 # ---------- palette ----------
 const SKY_TOP := Color("#8fd3e6")
 const SKY_BOT := Color("#5fbf8e")
@@ -68,9 +74,21 @@ var seesaw := {}
 var bananas := []
 var gator := {}
 var catch_radius := CATCH_RX_BASE
-var splashes := []
 var _font: Font
 var _cam_y := 0.0
+
+@onready var _mono: Array[AnimatedSprite2D] = [$Monkey0, $Monkey1]
+@onready var _gator_spr: AnimatedSprite2D = $Gator
+@onready var _seesaw_spr: Sprite2D = $Seesaw
+@onready var _banana_pool: Node2D = $BananaPool
+@onready var _splash_pool: Node2D = $SplashPool
+
+@onready var _snd_launch: AudioStreamPlayer = $SndLaunch
+@onready var _snd_catch: AudioStreamPlayer = $SndCatch
+@onready var _snd_banana: AudioStreamPlayer = $SndBanana
+@onready var _snd_splash: AudioStreamPlayer = $SndSplash
+@onready var _snd_chomp: AudioStreamPlayer = $SndChomp
+@onready var _snd_life_lost: AudioStreamPlayer = $SndLifeLost
 
 # Headless self-test (run with `--headless --mo-selftest`): autopilots the
 # see-saw so the catch/flip loop runs with no display, then reports + quits.
@@ -118,15 +136,24 @@ func _rand_drift() -> float:
 	return randf_range(-1.0, 1.0) * _drift_for_level()
 
 func _generate_bananas() -> void:
+	for child in _banana_pool.get_children():
+		child.queue_free()
 	bananas = []
 	var count := BANANA_BASE + BANANA_PER_LEVEL * (level - 1)
 	var margin := 12.0
 	for i in count:
-		bananas.append({
+		var b := {
 			"x": margin + randf() * (WORLD_W - margin * 2.0),
 			"y": BANANA_Y_MIN + randf() * (BANANA_Y_MAX - BANANA_Y_MIN),
 			"wobble": randf() * TAU,
-		})
+		}
+		var spr := AnimatedSprite2D.new()
+		spr.sprite_frames = BANANA_FRAMES
+		spr.play("default")
+		spr.position = Vector2(b.x, b.y - _cam_y)
+		b["spr"] = spr
+		_banana_pool.add_child(spr)
+		bananas.append(b)
 
 # ---------- game flow ----------
 func start_game() -> void:
@@ -138,7 +165,8 @@ func start_game() -> void:
 	gator = _make_gator()
 	_generate_bananas()
 	catch_radius = _catch_radius_for_level()
-	splashes.clear()
+	for child in _splash_pool.get_children():
+		child.queue_free()
 	_reset_round()
 
 func _reset_round() -> void:
@@ -161,9 +189,11 @@ func _launch(m: Dictionary, x: float, y: float) -> void:
 	m.y = y
 	m.vy = LAUNCH_VY
 	m.vx = _rand_drift()
+	_snd_launch.play()
 
 func _lose_life(splash_x: float) -> void:
 	lives -= 1
+	_snd_life_lost.play()
 	_spawn_splash(splash_x, WATER_Y)
 	_gator_chomp_at(splash_x)
 	if lives <= 0:
@@ -221,8 +251,11 @@ func _grab_bananas(air: Dictionary) -> void:
 		var dx: float = b.x - air.x
 		var dy: float = b.y - air.y
 		if dx * dx + dy * dy <= reach2:
+			if b.has("spr") and is_instance_valid(b.spr):
+				b.spr.queue_free()
 			bananas.remove_at(i)
 			score += POINTS_BANANA
+			_snd_banana.play()
 
 func _do_catch(air: Dictionary, ground: Dictionary, up: Vector2) -> void:
 	var old_down := _down_end()
@@ -235,11 +268,13 @@ func _do_catch(air: Dictionary, ground: Dictionary, up: Vector2) -> void:
 	seesaw.up_side *= -1
 	air_index = 1 - air_index
 	score += POINTS_CATCH
+	_snd_catch.play()
 
 # ---------- gator ----------
 func _gator_chomp_at(x: float) -> void:
 	gator.mode = "dash"
 	gator.target_x = clamp(x, 15.0, WORLD_W - 15.0)
+	_snd_chomp.play()
 
 func _update_gator(dt: float) -> void:
 	match gator.mode:
@@ -267,26 +302,74 @@ func _update_gator(dt: float) -> void:
 
 # ---------- splashes ----------
 func _spawn_splash(x: float, y: float) -> void:
-	var parts := []
-	for i in 10:
-		parts.append({
-			"x": x, "y": y,
-			"vx": randf_range(-1.0, 1.0) * 30.0,
-			"vy": -randf() * 55.0 - 15.0,
-			"r": 1.0 + randf() * 1.3,
-		})
-	splashes.append({"parts": parts, "life": 1.0})
+	_snd_splash.play()
+	var spr := AnimatedSprite2D.new()
+	spr.sprite_frames = SPLASH_FRAMES
+	spr.position = Vector2(x, y - _cam_y)
+	spr.animation_finished.connect(_on_splash_finished.bind(spr))
+	spr.play("default")
+	_splash_pool.add_child(spr)
 
-func _update_splashes(dt: float) -> void:
-	for i in range(splashes.size() - 1, -1, -1):
-		var s: Dictionary = splashes[i]
-		s.life -= dt * 1.6
-		for p in s.parts:
-			p.vy += 150.0 * dt
-			p.x += p.vx * dt
-			p.y += p.vy * dt
-		if s.life <= 0.0:
-			splashes.remove_at(i)
+
+func _on_splash_finished(spr: AnimatedSprite2D) -> void:
+	if is_instance_valid(spr):
+		spr.queue_free()
+
+# ---------- sprite updates ----------
+func _update_camera() -> void:
+	_cam_y = WORLD_H - VIEW_H
+	if phase == "playing" or phase == "gameover":
+		var air: Dictionary = monkeys[air_index]
+		_cam_y = clamp(air.y - VIEW_H * 0.45, 0.0, WORLD_H - VIEW_H)
+
+
+func _update_monkey_sprites() -> void:
+	for i in range(2):
+		var m: Dictionary = monkeys[i]
+		var spr: AnimatedSprite2D = _mono[i]
+		spr.position = Vector2(m.x, m.y - _cam_y)
+		spr.visible = true
+		match m.state:
+			"ground":
+				spr.play("idle")
+			"air":
+				if m.vy < 0.0:
+					spr.play("ascending")
+				else:
+					spr.play("descending")
+		spr.flip_h = (m.vx < 0.0)
+
+
+func _update_gator_sprite() -> void:
+	var spr: AnimatedSprite2D = _gator_spr
+	spr.position = Vector2(gator.x, WATER_Y + GATOR_Y_OFFSET - _cam_y)
+	spr.visible = true
+	match gator.mode:
+		"patrol":
+			spr.play("patrol")
+		"dash":
+			spr.play("alert")
+		"chomp":
+			spr.play("chomp")
+	var face_dir: int = gator.dir
+	if gator.mode == "dash" or gator.mode == "chomp":
+		var d: float = gator.target_x - gator.x
+		if d != 0.0:
+			face_dir = int(sign(d))
+	spr.flip_h = (face_dir < 0)
+
+
+func _update_seesaw_sprite() -> void:
+	var tilt_angle: float = atan2(TILT, PLANK) * seesaw.up_side
+	_seesaw_spr.position = Vector2(seesaw.x, SEESAW_Y - _cam_y)
+	_seesaw_spr.rotation = tilt_angle
+
+
+func _update_banana_sprites() -> void:
+	for b in bananas:
+		if b.has("spr") and is_instance_valid(b.spr):
+			var y: float = b.y + sin(time * 2.0 + b.wobble) * 0.75
+			b.spr.position = Vector2(b.x, y - _cam_y)
 
 # ---------- loop ----------
 func _physics_process(delta: float) -> void:
@@ -311,7 +394,6 @@ func _physics_process(delta: float) -> void:
 				break
 	else:
 		_update_gator(delta)
-	_update_splashes(delta)
 	if _selftest:
 		_selftest_frames += 1
 		if _selftest_frames >= 1200:
@@ -321,6 +403,11 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	time += delta
+	_update_camera()
+	_update_monkey_sprites()
+	_update_gator_sprite()
+	_update_seesaw_sprite()
+	_update_banana_sprites()
 	queue_redraw()
 
 func _input(event: InputEvent) -> void:
@@ -348,20 +435,12 @@ func _on_drag(world_x: float) -> void:
 
 # ---------- rendering ----------
 func _draw() -> void:
-	_cam_y = WORLD_H - VIEW_H
-	if phase == "playing" or phase == "gameover":
-		var air: Dictionary = monkeys[air_index]
-		_cam_y = clamp(air.y - VIEW_H * 0.45, 0.0, WORLD_H - VIEW_H)
-
 	_draw_sky()
 	_draw_tree()
-	_draw_bananas()
 	_draw_water()
-	_draw_gator()
-	_draw_splashes()
-	_draw_seesaw()
-	_draw_monkeys()
+	_draw_seesaw_base()
 	_draw_hud()
+	_draw_offscreen_indicator()
 	if phase != "playing":
 		_draw_overlay()
 
@@ -403,14 +482,6 @@ func _draw_tree() -> void:
 	_circ(cx, 25.0, 22.0, LEAF)
 	_circ(cx - 7.0, 21.0, 10.0, LEAF_HI)
 
-func _draw_bananas() -> void:
-	for b in bananas:
-		var x: float = b.x
-		var y: float = b.y + sin(time * 2.0 + b.wobble) * 0.75
-		_rect(x - 2.0, y - 3.0, 2.0, 1.0, BANANA)
-		_rect(x - 3.0, y - 1.0, 5.0, 2.0, BANANA)
-		_rect(x - 2.0, y + 1.0, 4.0, 1.0, BANANA_DK)
-
 func _draw_water() -> void:
 	if WATER_Y - _cam_y > VIEW_H + 10.0:
 		return
@@ -427,70 +498,8 @@ func _draw_water() -> void:
 		y += 2
 	_rect(0, wy, VIEW_W, 1.0, Color("#bfe9ff"))
 
-func _draw_gator() -> void:
-	var x: float = gator.x
-	var y := WATER_Y + GATOR_Y_OFFSET
-	var chomp: bool = gator.mode == "chomp"
-	_circ(x, y, 11.0, GATOR if chomp else GATOR_HI)
-	_circ(x + (8.0 if gator.dir >= 0 else -8.0), y - 1.0, 5.5, GATOR)
-	_rect(x - 4.0, y - 5.0, 1.5, 1.5, GATOR_DK)
-	_rect(x + 3.0, y - 5.0, 1.5, 1.5, GATOR_DK)
-	if chomp:
-		var tx := x + (2.0 if gator.dir >= 0 else -10.0)
-		for i in 4:
-			_rect(tx + i * 3.0, y - 2.0, 1.0, 1.0, Color.WHITE)
-
-func _draw_seesaw() -> void:
-	var up := _up_end()
-	var dn := _down_end()
+func _draw_seesaw_base() -> void:
 	_rect(seesaw.x - 5.5, SEESAW_Y + 0.5, 11.0, 4.0, WOOD_DK)
-	_ln(dn.x, dn.y, up.x, up.y, 3.0, WOOD)
-	_ln(dn.x, dn.y - 0.5, up.x, up.y - 0.5, 1.0, Color("#d68f43"))
-
-func _draw_monkeys() -> void:
-	for m in monkeys:
-		_draw_monkey(m.x, m.y, m.state == "air")
-
-func _draw_monkey(x: float, y: float, airborne: bool) -> void:
-	var u := MONKEY_R
-	# tail
-	_ln(x - u * 0.3, y + u * 1.05, x - u * 1.3, y + u * 0.4, u * 0.32, M_DARK)
-	# legs
-	if airborne:
-		_ln(x - u * 0.25, y + u * 1.0, x - u * 0.7, y + u * 0.35, u * 0.42, M_BODY)
-		_ln(x + u * 0.25, y + u * 1.0, x + u * 0.7, y + u * 0.35, u * 0.42, M_BODY)
-	else:
-		_ln(x - u * 0.3, y + u * 1.0, x - u * 0.4, y + u * 1.7, u * 0.42, M_BODY)
-		_ln(x + u * 0.3, y + u * 1.0, x + u * 0.4, y + u * 1.7, u * 0.42, M_BODY)
-	# arms + hands
-	if airborne:
-		_ln(x - u * 0.5, y + u * 0.05, x - u * 0.95, y - u * 1.25, u * 0.36, M_BODY)
-		_ln(x + u * 0.5, y + u * 0.05, x + u * 0.95, y - u * 1.25, u * 0.36, M_BODY)
-		_circ(x - u * 0.95, y - u * 1.25, u * 0.22, M_DARK)
-		_circ(x + u * 0.95, y - u * 1.25, u * 0.22, M_DARK)
-	else:
-		_ln(x - u * 0.5, y + u * 0.1, x - u * 0.95, y + u * 0.8, u * 0.36, M_BODY)
-		_ln(x + u * 0.5, y + u * 0.1, x + u * 0.95, y + u * 0.8, u * 0.36, M_BODY)
-		_circ(x - u * 0.95, y + u * 0.8, u * 0.22, M_DARK)
-		_circ(x + u * 0.95, y + u * 0.8, u * 0.22, M_DARK)
-	# body
-	_circ(x, y + u * 0.5, u * 0.8, M_BODY)
-	# ears
-	_circ(x - u * 0.85, y - u * 0.5, u * 0.42, M_DARK)
-	_circ(x + u * 0.85, y - u * 0.5, u * 0.42, M_DARK)
-	_circ(x - u * 0.85, y - u * 0.5, u * 0.22, M_FACE)
-	_circ(x + u * 0.85, y - u * 0.5, u * 0.22, M_FACE)
-	# head + face
-	_circ(x, y - u * 0.55, u * 0.85, M_BODY)
-	_circ(x, y - u * 0.4, u * 0.52, M_FACE)
-	# eyes
-	_rect(x - u * 0.32, y - u * 0.62, 1.0, 1.0, M_EYE)
-	_rect(x + u * 0.22, y - u * 0.62, 1.0, 1.0, M_EYE)
-
-func _draw_splashes() -> void:
-	for s in splashes:
-		for p in s.parts:
-			_rect(p.x, p.y, 1.0, 1.0, Color("#cdefff"))
 
 func _draw_hud() -> void:
 	draw_string(_font, Vector2(4, 12), str(score), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, INK)
@@ -498,6 +507,20 @@ func _draw_hud() -> void:
 	for i in lives:
 		_rect_screen(WORLD_W - 8.0 - i * 7.0, 5.0, 5.0, 5.0, M_BODY)
 	draw_string(_font, Vector2(WORLD_W - 22, 22), "LV " + str(level), HORIZONTAL_ALIGNMENT_LEFT, -1, 7, INK)
+
+
+func _draw_offscreen_indicator() -> void:
+	if phase != "playing":
+		return
+	if SEESAW_Y - _cam_y <= VIEW_H - 2.5:
+		return
+	var x: float = seesaw.x
+	var col := Color(BANANA.r, BANANA.g, BANANA.b, 0.95)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(x - 3.5, VIEW_H - 6.5),
+		Vector2(x + 3.5, VIEW_H - 6.5),
+		Vector2(x,       VIEW_H - 2.0),
+	]), col)
 
 func _rect_screen(x: float, y: float, w: float, h: float, c: Color) -> void:
 	draw_rect(Rect2(Vector2(x, y), Vector2(w, h)), c)

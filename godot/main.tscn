@@ -1,6 +1,54 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=13 format=3]
 
-[ext_resource type="Script" path="res://main.gd" id="1"]
+[ext_resource type="Script" path="res://main.gd" id="1_monkey_overboard_main"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/monkey_frames.tres" id="2_monkey_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/gator_frames.tres" id="3_gator_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/banana_frames.tres" id="4_banana_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/splash_frames.tres" id="5_splash_frames"]
+[ext_resource type="Texture2D" path="res://assets/sprites/seesaw_plank.png" id="6_seesaw_plank"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/launch.ogg" id="7_snd_launch"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/catch.ogg" id="8_snd_catch"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/banana.ogg" id="9_snd_banana"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/splash.ogg" id="10_snd_splash"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/chomp.ogg" id="11_snd_chomp"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/life_lost.ogg" id="12_snd_life_lost"]
 
 [node name="Main" type="Node2D"]
-script = ExtResource("1")
+script = ExtResource("1_monkey_overboard_main")
+
+[node name="Monkey0" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("2_monkey_frames")
+animation = &"idle"
+
+[node name="Monkey1" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("2_monkey_frames")
+animation = &"idle"
+
+[node name="Gator" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("3_gator_frames")
+animation = &"patrol"
+
+[node name="Seesaw" type="Sprite2D" parent="."]
+texture = ExtResource("6_seesaw_plank")
+
+[node name="BananaPool" type="Node2D" parent="."]
+
+[node name="SplashPool" type="Node2D" parent="."]
+
+[node name="SndLaunch" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_snd_launch")
+
+[node name="SndCatch" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_snd_catch")
+
+[node name="SndBanana" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("9_snd_banana")
+
+[node name="SndSplash" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_snd_splash")
+
+[node name="SndChomp" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_snd_chomp")
+
+[node name="SndLifeLost" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_snd_life_lost")

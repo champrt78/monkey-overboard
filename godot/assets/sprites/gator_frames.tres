@@ -1,0 +1,54 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/gator_sheet.png" id="gator_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_patrol"]
+atlas = ExtResource("gator_sheet")
+region = Rect2(0, 0, 32, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_alert"]
+atlas = ExtResource("gator_sheet")
+region = Rect2(32, 0, 32, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_chomp"]
+atlas = ExtResource("gator_sheet")
+region = Rect2(64, 0, 32, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_satisfied"]
+atlas = ExtResource("gator_sheet")
+region = Rect2(96, 0, 32, 12)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_patrol")
+}],
+"loop": true,
+"name": &"patrol",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_alert")
+}],
+"loop": true,
+"name": &"alert",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_chomp")
+}],
+"loop": true,
+"name": &"chomp",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_satisfied")
+}],
+"loop": true,
+"name": &"satisfied",
+"speed": 8.0
+}]
