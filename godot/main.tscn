@@ -55,12 +55,12 @@ sprite_frames = ExtResource("4_monkey_frames")
 animation = &"idle"
 
 [node name="Gator" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(1.0, 1.0)
 sprite_frames = ExtResource("5_gator_frames")
 animation = &"patrol"
 
 [node name="Seesaw" type="Sprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(1.0, 1.0)
 texture = ExtResource("8_seesaw_plank")
 
 [node name="BananaPool" type="Node2D" parent="."]

@@ -1,38 +1,38 @@
-[gd_resource type="SpriteFrames" load_steps=9 format=3]
+[gd_resource type="SpriteFrames" load_steps=12 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/sprites/monkey_sheet.png" id="monkey_sheet"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_idle0"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(0, 0, 28, 28)
+region = Rect2(0, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(28, 0, 28, 28)
+region = Rect2(16, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_asc0"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ascend0"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(56, 0, 28, 28)
+region = Rect2(32, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_asc1"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ascend1"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(84, 0, 28, 28)
+region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_desc0"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_descend0"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(112, 0, 28, 28)
+region = Rect2(64, 0, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_desc1"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_descend1"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(140, 0, 28, 28)
+region = Rect2(80, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tumble0"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(168, 0, 28, 28)
+region = Rect2(96, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tumble1"]
 atlas = ExtResource("monkey_sheet")
-region = Rect2(196, 0, 28, 28)
+region = Rect2(112, 0, 16, 16)
 
 [resource]
 animations = [{
@@ -45,14 +45,14 @@ animations = [{
 }],
 "loop": true,
 "name": &"idle",
-"speed": 8.0
+"speed": 6.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_asc0")
+"texture": SubResource("AtlasTexture_ascend0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_asc1")
+"texture": SubResource("AtlasTexture_ascend1")
 }],
 "loop": true,
 "name": &"ascending",
@@ -60,10 +60,10 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_desc0")
+"texture": SubResource("AtlasTexture_descend0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_desc1")
+"texture": SubResource("AtlasTexture_descend1")
 }],
 "loop": true,
 "name": &"descending",
@@ -78,5 +78,5 @@ animations = [{
 }],
 "loop": true,
 "name": &"tumble",
-"speed": 12.0
+"speed": 10.0
 }]

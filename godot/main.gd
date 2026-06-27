@@ -11,17 +11,17 @@ const WORLD_W := 135.0
 const WORLD_H := 720.0
 const WATER_Y := 705.0      # WORLD_H - 15
 const SEESAW_Y := 700.5     # WATER_Y - 4.5
-const PLANK := 20.5
+const PLANK := 22.0
 const TILT := 11.5
 const CATCH_RX_BASE := 14.0
 const CATCH_RX_MIN := 8.5
-const MONKEY_R := 5.5
+const MONKEY_R := 6.5
 const GRAV := 225.0
 const LAUNCH_VY := -525.0
 const DRIFT_BASE := 24.0
 const DRIFT_PER_LEVEL := 4.5
 const DRIFT_MAX := 57.0
-const BANANA_R := 4.0
+const BANANA_R := 3.0
 const BANANA_BASE := 48
 const BANANA_PER_LEVEL := 12
 const BANANA_Y_MIN := 40.0
@@ -39,6 +39,7 @@ const POINTS_CATCH := 2
 const LIVES := 3
 const CAMERA_CATCH_BLEND_WINDOW := 340.0  # world units above seesaw where framing starts
 const CAMERA_MAX_SPEED := 320.0           # max camera pan speed (px/s)
+const CAMERA_OVERSHOOT := 80.0            # how far past the world bottom the camera can frame
 
 const MONKEY_FRAMES := preload("res://assets/sprites/monkey_frames.tres")
 const GATOR_FRAMES := preload("res://assets/sprites/gator_frames.tres")
@@ -314,18 +315,18 @@ func _do_catch(air: Dictionary, ground: Dictionary, up: Vector2) -> void:
 # ---------- gator ----------
 func _gator_chomp_at(x: float) -> void:
 	gator.mode = "dash"
-	gator.target_x = clamp(x, 15.0, WORLD_W - 15.0)
+	gator.target_x = clamp(x, 16.0, WORLD_W - 16.0)
 	_snd_chomp.play()
 
 func _update_gator(dt: float) -> void:
 	match gator.mode:
 		"patrol":
 			gator.x += gator.dir * GATOR_PATROL_SPEED * dt
-			if gator.x < 15.0:
-				gator.x = 15.0
+			if gator.x < 16.0:
+				gator.x = 16.0
 				gator.dir = 1
-			elif gator.x > WORLD_W - 15.0:
-				gator.x = WORLD_W - 15.0
+			elif gator.x > WORLD_W - 16.0:
+				gator.x = WORLD_W - 16.0
 				gator.dir = -1
 		"telegraph":
 			gator.telegraph_timer -= dt
@@ -370,7 +371,7 @@ func _spawn_splash(x: float, y: float) -> void:
 	var spr := AnimatedSprite2D.new()
 	spr.sprite_frames = SPLASH_FRAMES
 	spr.position = Vector2(x, y - _cam_y)
-	spr.scale = Vector2(0.5, 0.5)
+	spr.scale = Vector2(1.0, 1.0)
 	spr.animation_finished.connect(_on_splash_finished.bind(spr))
 	spr.play("default")
 	_splash_pool.add_child(spr)
@@ -394,14 +395,15 @@ func _update_camera() -> void:
 			var dist_to_seesaw: float = SEESAW_Y - air_y
 			var t: float = clamp(1.0 - dist_to_seesaw / CAMERA_CATCH_BLEND_WINDOW, 0.0, 1.0)
 			t = t * t * (3.0 - 2.0 * t)  # smoothstep
-			# Framing that keeps the seesaw clearly visible for the whole descent.
-			var catch_target: float = SEESAW_Y - VIEW_H * 0.52
-			catch_target = clamp(catch_target, 0.0, WORLD_H - VIEW_H)
+			# Framing that keeps the seesaw clearly visible with room below it.
+			var catch_target: float = SEESAW_Y - VIEW_H * 0.62
+			catch_target = clamp(catch_target, 0.0, WORLD_H - VIEW_H + CAMERA_OVERSHOOT)
 			target_y = lerp(follow_target, catch_target, t)
 
 	# Smooth camera motion with a velocity cap so it never snaps or overshoots.
 	var delta := get_process_delta_time()
-	_cam_y = move_toward(_cam_y, clamp(target_y, 0.0, WORLD_H - VIEW_H), CAMERA_MAX_SPEED * delta)
+	var cam_max: float = WORLD_H - VIEW_H + CAMERA_OVERSHOOT
+	_cam_y = move_toward(_cam_y, clamp(target_y, 0.0, cam_max), CAMERA_MAX_SPEED * delta)
 	_jungle_bg.position = Vector2(0, -_cam_y)
 
 
@@ -489,7 +491,7 @@ func _physics_process(delta: float) -> void:
 			if air.state == "air" and air.vy > 0.0 and air.y > WATER_Y - GATOR_LUNGE_TRIGGER_Y:
 				gator.mode = "telegraph"
 				gator.telegraph_timer = GATOR_TELEGRAPH_TIME
-				gator.target_x = clamp(air.x, 15.0, WORLD_W - 15.0)
+				gator.target_x = clamp(air.x, 16.0, WORLD_W - 16.0)
 		# Keyboard movement applied in physics step where delta is available.
 		if not _selftest and phase == "playing":
 			var kbd := 0.0
@@ -613,7 +615,7 @@ func _draw_water() -> void:
 	if WATER_Y - _cam_y > VIEW_H + 10.0:
 		return
 	var wy := WATER_Y
-	var bottom := WORLD_H + 1.0
+	var bottom: float = max(WORLD_H + 1.0, _cam_y + VIEW_H + 2.0)
 	_rect(0, wy, VIEW_W, bottom - wy, WATER)
 	# chunky dither
 	var y := int(wy)

@@ -4,15 +4,15 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b0"]
 atlas = ExtResource("banana_sheet")
-region = Rect2(0, 0, 20, 20)
+region = Rect2(0, 0, 8, 8)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b1"]
 atlas = ExtResource("banana_sheet")
-region = Rect2(20, 0, 20, 20)
+region = Rect2(8, 0, 8, 8)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b2"]
 atlas = ExtResource("banana_sheet")
-region = Rect2(40, 0, 20, 20)
+region = Rect2(16, 0, 8, 8)
 
 [resource]
 animations = [{
@@ -28,5 +28,5 @@ animations = [{
 }],
 "loop": true,
 "name": &"default",
-"speed": 6.0
+"speed": 8.0
 }]

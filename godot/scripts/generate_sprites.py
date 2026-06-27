@@ -81,91 +81,90 @@ def generate(name: str, prompt: str, final_wh: tuple, gen_wh: tuple):
     print(f"  WARNING: no image returned for {name}")
 
 
-# Sprites are generated at 4x final resolution then downscaled with nearest-neighbor.
-# Final frame sizes are doubled from the original 14x14-era sprites; the scene scales
-# the AnimatedSprite2D nodes to 0.5 so they keep the same world proportions while
-# looking crisp at higher resolution.
+# Sprites are generated at 2x final resolution then downscaled with nearest-neighbor.
+# The in-game Sprite2D / AnimatedSprite2D nodes use scale (1, 1), so one source pixel
+# equals one viewport pixel — no runtime scaling, no fractional pixels.
 SPRITES = [
     (
         "monkey_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A heroic cartoon jungle monkey in the same detailed modern-retro pixel art style as the jungle background. "
-        "8 frames in one horizontal row, final size 224x28 pixels (each frame 28x28). "
-        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "8 frames in one horizontal row, final size 128x16 pixels (each frame 16x16). "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture. "
         "Thick black outline, strong cel-shading with 3 tones, warm brown/tan fur, expressive face, clear limbs. "
         "Frame 0-1: idle standing. Frame 2-3: ascending with arms reaching up. "
         "Frame 4-5: descending with arms tucked. Frame 6-7: tumbling spin. "
         "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
-        (224, 28),
-        (896, 112),
+        (128, 16),
+        (256, 32),
     ),
     (
         "gator_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A cartoon alligator in the same detailed modern-retro pixel art style as the jungle background. "
-        "5 frames in one horizontal row, final size 320x24 pixels (each frame 64x24). "
+        "5 frames in one horizontal row, final size 160x12 pixels (each frame 32x12). "
         "Completely transparent background, NO mat, NO background color, NO checkerboard, NO gray border, PURE SOLID WHITE BACKGROUND #FFFFFF is also acceptable. "
         "Thick black outline, strong cel-shading, jungle green scales, expressive yellow eyes, white teeth. "
         "Frame 0-1: patrol swimming. Frame 2: alert rearing up. Frame 3-4: chomp with jaws wide. "
         "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
+        (160, 12),
         (320, 24),
-        (1280, 96),
     ),
     (
         "gator_lunge_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A cartoon alligator LUNGING forward in the same detailed modern-retro pixel art style as the jungle background. "
-        "2 frames in one horizontal row, final size 128x24 pixels (each frame 64x24). "
+        "2 frames in one horizontal row, final size 64x12 pixels (each frame 32x12). "
         "Completely transparent background, NO mat, NO background color, NO checkerboard, NO gray border, PURE SOLID WHITE BACKGROUND #FFFFFF is also acceptable. "
         "Thick black outline, strong cel-shading, jungle green scales, big yellow eyes, white teeth visible. "
         "Frame 0: body coiled back ready to lunge, mouth open. Frame 1: stretched forward mid-lunge, jaws wide. "
         "Side-view 2D game sprite facing LEFT, modern retro pixel art, cohesive with the lush jungle plate.",
+        (64, 12),
         (128, 24),
-        (512, 96),
     ),
     (
         "gator_chomp_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A cartoon alligator CHOMPING in the same detailed modern-retro pixel art style as the jungle background. "
-        "2 frames in one horizontal row, final size 128x24 pixels (each frame 64x24). "
+        "2 frames in one horizontal row, final size 64x12 pixels (each frame 32x12). "
         "Completely transparent background, NO mat, NO background color, NO checkerboard, NO gray border, PURE SOLID WHITE BACKGROUND #FFFFFF is also acceptable. "
         "Thick black outline, strong cel-shading, jungle green scales, big yellow eyes, massive white teeth. "
         "Frame 0: jaws wide open waiting for the monkey to fall in. Frame 1: jaws snapping shut. "
         "Side-view 2D game sprite facing LEFT, modern retro pixel art, cohesive with the lush jungle plate.",
+        (64, 12),
         (128, 24),
-        (512, 96),
     ),
     (
         "banana_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A bright yellow banana in the same detailed modern-retro pixel art style as the jungle background. "
-        "3 frames in one horizontal row, final size 60x20 pixels (each frame 20x20). "
-        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "3 frames in one horizontal row, final size 24x8 pixels (each frame 8x8). "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture. "
         "Thick black outline, slight wobble/shimmer, small highlight. "
         "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
-        (60, 20),
-        (240, 80),
+        (24, 8),
+        (48, 16),
     ),
     (
         "splash_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A water splash in the same detailed modern-retro pixel art style as the jungle background. "
-        "5 frames in one horizontal row, final size 160x32 pixels (each frame 32x32). "
-        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "5 frames in one horizontal row, final size 80x16 pixels (each frame 16x16). "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture. "
         "Blue and white water, impact to peak spray to dissipate. "
         "Side-view 2D game sprite, modern retro pixel art, cohesive with the lush jungle plate.",
+        (80, 16),
         (160, 32),
-        (640, 128),
     ),
     (
         "seesaw_plank.png",
         "High quality detailed pixel art wooden seesaw plank matching BOTH reference images. "
-        "Single frame, final size 88x12 pixels. "
-        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture."
+        "Single frame, final size 44x6 pixels. "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF only, no gradients, no checkerboard, no gray, no texture. "
         "Brown wood grain with darker ends, metal fulcrum hint, strong cel-shading. "
         "Modern retro pixel art, cohesive with the lush jungle plate.",
+        (44, 6),
         (88, 12),
-        (352, 48),
     ),
 ]
 
