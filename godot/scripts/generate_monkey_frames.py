@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate Monkey Overboard monkey frames individually and pack them into a sheet."""
 import os
+import shutil
 import sys
 from pathlib import Path
 from io import BytesIO
@@ -19,14 +20,18 @@ if not api_key:
     sys.exit("ERROR: GEMINI_API_KEY not set")
 client = genai.Client(api_key=api_key)
 MODEL = "models/gemini-3.1-flash-image"
-MULLET_REF = Path("C:/Users/Ray/Kimi-Repos/mulletdown/docs/mockups/screens/title_plate.png")
-JUNGLE_REF = Path("C:/Users/Ray/kimi-repos/monkey-overboard/godot/assets/backgrounds/jungle_bg.png")
+MULLET_REF = Path(os.environ.get(
+    "MULLET_REF",
+    "C:/Users/Ray/Kimi-Repos/mulletdown/docs/mockups/screens/title_plate.png",
+))
+JUNGLE_REF = REPO_ROOT / "assets" / "backgrounds" / "jungle_bg.png"
 
 FRAME_W, FRAME_H = 28, 28
-FINAL_SHEET = (FRAME_W * 8, FRAME_H)
+FINAL_SHEET: tuple[int, int] = (FRAME_W * 8, FRAME_H)
+GEN_SCALE = 4
 
 
-def _load_ref(path: Path):
+def _load_ref(path: Path) -> types.Part:
     return types.Part.from_bytes(data=path.read_bytes(), mime_type="image/png")
 
 
@@ -62,10 +67,15 @@ def _remove_bg(img: Image.Image) -> Image.Image:
     return Image.fromarray(arr, "RGBA")
 
 
-def _generate_one(prompt: str, out: Path, gen_wh: tuple):
+def _generate_one(prompt: str, out: Path, gen_wh: tuple[int, int]) -> None:
     print(f"Generating {out.name} ...")
     parts = [prompt, _load_ref(MULLET_REF), _load_ref(JUNGLE_REF)]
-    response = client.models.generate_content(model=MODEL, contents=parts)
+    try:
+        response = client.models.generate_content(model=MODEL, contents=parts)
+    except Exception as exc:
+        raise RuntimeError(f"Generation failed for {out.name}: {exc}") from exc
+    if not response.candidates:
+        raise RuntimeError(f"No candidates returned for {out.name}")
     for part in response.candidates[0].content.parts:
         if hasattr(part, "inline_data") and part.inline_data and part.inline_data.data:
             img = Image.open(BytesIO(part.inline_data.data)).convert("RGBA")
@@ -76,18 +86,26 @@ def _generate_one(prompt: str, out: Path, gen_wh: tuple):
             img.save(out, "PNG")
             print(f"  Saved {out.name} at {img.size}")
             return
-    print(f"  WARNING: no image returned for {out.name}")
+    raise RuntimeError(f"No image returned for {out.name}")
+
+
+def _frame_prompt(pose: str) -> str:
+    return (
+        f"Modern-retro pixel-art jungle monkey, {pose}, side view facing right. "
+        "Thick black outline, cel-shaded brown/tan fur. "
+        "PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."
+    )
 
 
 FRAME_PROMPTS = [
-    ("idle_0.png", "Modern-retro pixel-art jungle monkey, standing idle, slight breathing pose, side view facing right. Thick black outline, cel-shaded brown/tan fur, expressive face. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("idle_1.png", "Modern-retro pixel-art jungle monkey, standing idle with a tiny upward lean, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("ascend_0.png", "Modern-retro pixel-art jungle monkey, ascending with arms reaching up, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("ascend_1.png", "Modern-retro pixel-art jungle monkey, ascending higher with arms stretched, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("descend_0.png", "Modern-retro pixel-art jungle monkey, descending with arms tucked, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("descend_1.png", "Modern-retro pixel-art jungle monkey, descending with arms and legs tucked, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("tumble_0.png", "Modern-retro pixel-art jungle monkey, tumbling/spinning in mid-air, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
-    ("tumble_1.png", "Modern-retro pixel-art jungle monkey, tumbling/spinning further, side view facing right. Thick black outline, cel-shaded brown/tan fur. PURE SOLID WHITE BACKGROUND #FFFFFF. Final size 28x28 pixels."),
+    ("idle_0.png", _frame_prompt("standing idle, slight breathing pose, expressive face")),
+    ("idle_1.png", _frame_prompt("standing idle with a tiny upward lean")),
+    ("ascend_0.png", _frame_prompt("ascending with arms reaching up")),
+    ("ascend_1.png", _frame_prompt("ascending higher with arms stretched")),
+    ("descend_0.png", _frame_prompt("descending with arms tucked")),
+    ("descend_1.png", _frame_prompt("descending with arms and legs tucked")),
+    ("tumble_0.png", _frame_prompt("tumbling/spinning in mid-air")),
+    ("tumble_1.png", _frame_prompt("tumbling/spinning further")),
 ]
 
 
@@ -112,21 +130,20 @@ def _verify_sheet(path: Path) -> bool:
     return True
 
 
-def main():
+def main() -> None:
     tmp_dir = OUT_DIR / "_monkey_tmp"
     tmp_dir.mkdir(exist_ok=True)
     frames = []
-    gen_wh = (FRAME_W * 4, FRAME_H * 4)
+    gen_wh: tuple[int, int] = (FRAME_W * GEN_SCALE, FRAME_H * GEN_SCALE)
     for name, prompt in FRAME_PROMPTS:
         out = tmp_dir / name
         _generate_one(prompt, out, gen_wh)
+        if not out.exists():
+            raise RuntimeError(f"Frame file missing after generation: {out}")
         frames.append(out)
 
     sheet = Image.new("RGBA", FINAL_SHEET, (255, 255, 255, 0))
     for i, path in enumerate(frames):
-        if not path.exists():
-            print(f"ERROR: missing frame {path}")
-            continue
         frm = Image.open(path).convert("RGBA")
         if frm.size != (FRAME_W, FRAME_H):
             print(f"WARNING: resizing {path.name} from {frm.size} to {(FRAME_W, FRAME_H)}")
@@ -140,6 +157,9 @@ def main():
     if not _verify_sheet(out_path):
         sys.exit("ERROR: sheet verification failed")
     print("Sheet verified.")
+
+    shutil.rmtree(tmp_dir)
+    print(f"Cleaned up {tmp_dir}")
 
 
 if __name__ == "__main__":
