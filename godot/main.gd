@@ -37,7 +37,8 @@ const GATOR_LUNGE_TRIGGER_Y := 30.0
 const POINTS_BANANA := 10
 const POINTS_CATCH := 2
 const LIVES := 3
-const CAMERA_CATCH_BLEND_WINDOW := 280.0  # world units above seesaw where framing starts
+const CAMERA_CATCH_BLEND_WINDOW := 340.0  # world units above seesaw where framing starts
+const CAMERA_MAX_SPEED := 320.0           # max camera pan speed (px/s)
 
 const MONKEY_FRAMES := preload("res://assets/sprites/monkey_frames.tres")
 const GATOR_FRAMES := preload("res://assets/sprites/gator_frames.tres")
@@ -153,7 +154,7 @@ func _make_banana_sprite(x: float, y: float) -> AnimatedSprite2D:
 	spr.sprite_frames = BANANA_FRAMES
 	spr.play("default")
 	spr.position = Vector2(x, y - _cam_y)
-	spr.scale = Vector2(0.5, 0.5)
+	spr.scale = Vector2(1.0, 1.0)
 	_banana_pool.add_child(spr)
 	return spr
 
@@ -385,20 +386,22 @@ func _update_camera() -> void:
 	if phase == "playing" or phase == "gameover":
 		var air: Dictionary = monkeys[air_index]
 		var air_y: float = air.y
-		var follow_target: float = clamp(air_y - VIEW_H * 0.45, 0.0, WORLD_H - VIEW_H)
+		# Normal follow keeps the monkey in the upper half while ascending.
+		var follow_target: float = clamp(air_y - VIEW_H * 0.38, 0.0, WORLD_H - VIEW_H)
 		target_y = follow_target
 
 		if air.state == "air" and air.vy > 0.0:
 			var dist_to_seesaw: float = SEESAW_Y - air_y
 			var t: float = clamp(1.0 - dist_to_seesaw / CAMERA_CATCH_BLEND_WINDOW, 0.0, 1.0)
-			# Bias the camera downward so the seesaw stays visible earlier during the descent.
-			var catch_target: float = SEESAW_Y - VIEW_H * 0.60
+			t = t * t * (3.0 - 2.0 * t)  # smoothstep
+			# Framing that keeps the seesaw clearly visible for the whole descent.
+			var catch_target: float = SEESAW_Y - VIEW_H * 0.52
 			catch_target = clamp(catch_target, 0.0, WORLD_H - VIEW_H)
-			# Also lead the fall slightly: shift target down based on downward velocity.
-			var lead: float = air.vy * 0.18
-			target_y = lerp(follow_target, catch_target + lead, t * t)
+			target_y = lerp(follow_target, catch_target, t)
 
-	_cam_y = lerp(_cam_y, target_y, 0.15)
+	# Smooth camera motion with a velocity cap so it never snaps or overshoots.
+	var delta := get_process_delta_time()
+	_cam_y = move_toward(_cam_y, clamp(target_y, 0.0, WORLD_H - VIEW_H), CAMERA_MAX_SPEED * delta)
 	_jungle_bg.position = Vector2(0, -_cam_y)
 
 
@@ -639,22 +642,24 @@ func _draw_offscreen_indicator() -> void:
 	var sy: float = SEESAW_Y - _cam_y
 	if sy >= 0.0 and sy <= VIEW_H:
 		return
-	var x: float = clamp(seesaw.x, 4.0, VIEW_W - 4.0)
+	var x: float = clamp(seesaw.x, 6.0, VIEW_W - 6.0)
 	var col := Color(BANANA.r, BANANA.g, BANANA.b, 0.95)
 	if sy < 0.0:
 		# Seesaw is above the visible area — chevron points up at the top edge.
 		draw_colored_polygon(PackedVector2Array([
-			Vector2(x - 4.0, 5.0),
-			Vector2(x + 4.0, 5.0),
+			Vector2(x - 6.0, 7.0),
+			Vector2(x + 6.0, 7.0),
 			Vector2(x,       0.0),
 		]), col)
+		draw_line(Vector2(x, 0.0), Vector2(x, 7.0), col, 1.0)
 	else:
 		# Seesaw is below the visible area — chevron points down at the bottom edge.
 		draw_colored_polygon(PackedVector2Array([
-			Vector2(x - 4.0, VIEW_H - 5.0),
-			Vector2(x + 4.0, VIEW_H - 5.0),
+			Vector2(x - 6.0, VIEW_H - 7.0),
+			Vector2(x + 6.0, VIEW_H - 7.0),
 			Vector2(x,       VIEW_H),
 		]), col)
+		draw_line(Vector2(x, VIEW_H), Vector2(x, VIEW_H - 7.0), col, 1.0)
 
 func _draw_catch_guide() -> void:
 	if phase != "playing":
