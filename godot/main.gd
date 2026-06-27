@@ -82,7 +82,6 @@ var gator := {}
 var catch_radius := CATCH_RX_BASE
 var _font: Font
 var _cam_y := 0.0
-var _kb_move: float = 0.0
 
 @onready var _mono: Array[AnimatedSprite2D] = [$Monkey0, $Monkey1]
 @onready var _gator_spr: AnimatedSprite2D = $Gator
@@ -486,10 +485,16 @@ func _physics_process(delta: float) -> void:
 				gator.telegraph_timer = GATOR_TELEGRAPH_TIME
 				gator.target_x = clamp(air.x, 15.0, WORLD_W - 15.0)
 		# Keyboard movement applied in physics step where delta is available.
-		if _kb_move != 0.0 and phase == "playing":
-			var kbd_speed := 110.0
-			seesaw.target_x = clamp(seesaw.target_x + _kb_move * kbd_speed * delta,
-				MONKEY_R, WORLD_W - MONKEY_R)
+		if not _selftest and phase == "playing":
+			var kbd := 0.0
+			if Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+				kbd -= 1.0
+			if Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+				kbd += 1.0
+			if kbd != 0.0:
+				var kbd_speed := 110.0
+				seesaw.target_x = clamp(seesaw.target_x + kbd * kbd_speed * delta,
+					MONKEY_R, WORLD_W - MONKEY_R)
 	else:
 		_update_gator(delta)
 	if _selftest:
@@ -535,18 +540,6 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion:
 		if event.button_mask & MOUSE_BUTTON_MASK_LEFT:
 			_on_drag(event.position.x)
-
-	# Keyboard fallback for desktop testing
-	if event is InputEventKey:
-		var key_event := event as InputEventKey
-		if not key_event.echo:
-			var is_left: bool = key_event.keycode == KEY_LEFT or key_event.keycode == KEY_A
-			var is_right: bool = key_event.keycode == KEY_RIGHT or key_event.keycode == KEY_D
-			if is_left or is_right:
-				if key_event.pressed:
-					_kb_move = -1.0 if is_left else 1.0
-				else:
-					_kb_move = 0.0
 
 func _on_tap() -> void:
 	if phase == "menu" or phase == "gameover":
@@ -640,15 +633,25 @@ func _draw_hud() -> void:
 func _draw_offscreen_indicator() -> void:
 	if phase != "playing":
 		return
-	if SEESAW_Y - _cam_y <= VIEW_H - 2.5:
+	var sy: float = SEESAW_Y - _cam_y
+	if sy >= 0.0 and sy <= VIEW_H:
 		return
-	var x: float = seesaw.x
+	var x: float = clamp(seesaw.x, 4.0, VIEW_W - 4.0)
 	var col := Color(BANANA.r, BANANA.g, BANANA.b, 0.95)
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(x - 3.5, VIEW_H - 6.5),
-		Vector2(x + 3.5, VIEW_H - 6.5),
-		Vector2(x,       VIEW_H - 2.0),
-	]), col)
+	if sy < 0.0:
+		# Seesaw is above the visible area — chevron points up at the top edge.
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(x - 4.0, 5.0),
+			Vector2(x + 4.0, 5.0),
+			Vector2(x,       0.0),
+		]), col)
+	else:
+		# Seesaw is below the visible area — chevron points down at the bottom edge.
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(x - 4.0, VIEW_H - 5.0),
+			Vector2(x + 4.0, VIEW_H - 5.0),
+			Vector2(x,       VIEW_H),
+		]), col)
 
 func _draw_catch_guide() -> void:
 	if phase != "playing":
