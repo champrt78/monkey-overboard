@@ -37,6 +37,7 @@ const GATOR_LUNGE_TRIGGER_Y := 30.0
 const POINTS_BANANA := 10
 const POINTS_CATCH := 2
 const LIVES := 3
+const CAMERA_CATCH_BLEND_WINDOW := 180.0  # world units above seesaw where framing starts
 
 const MONKEY_FRAMES := preload("res://assets/sprites/monkey_frames.tres")
 const GATOR_FRAMES := preload("res://assets/sprites/gator_frames.tres")
@@ -355,10 +356,21 @@ func _on_splash_finished(spr: AnimatedSprite2D) -> void:
 
 # ---------- sprite updates ----------
 func _update_camera() -> void:
-	_cam_y = WORLD_H - VIEW_H
+	var target_y := WORLD_H - VIEW_H
 	if phase == "playing" or phase == "gameover":
 		var air: Dictionary = monkeys[air_index]
-		_cam_y = clamp(air.y - VIEW_H * 0.45, 0.0, WORLD_H - VIEW_H)
+		var air_y: float = air.y
+		var follow_target: float = clamp(air_y - VIEW_H * 0.45, 0.0, WORLD_H - VIEW_H)
+		target_y = follow_target
+
+		if air.state == "air" and air.vy > 0.0:
+			var dist_to_seesaw: float = SEESAW_Y - air_y
+			var t: float = clamp(1.0 - dist_to_seesaw / CAMERA_CATCH_BLEND_WINDOW, 0.0, 1.0)
+			var catch_target: float = (SEESAW_Y + air_y) * 0.5 - VIEW_H * 0.5
+			catch_target = clamp(catch_target, 0.0, WORLD_H - VIEW_H)
+			target_y = lerp(follow_target, catch_target, t * t)
+
+	_cam_y = lerp(_cam_y, target_y, 0.15)
 	_jungle_bg.position = Vector2(0, -_cam_y)
 
 
