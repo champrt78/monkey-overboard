@@ -82,6 +82,7 @@ var gator := {}
 var catch_radius := CATCH_RX_BASE
 var _font: Font
 var _cam_y := 0.0
+var _kb_move: float = 0.0
 
 @onready var _mono: Array[AnimatedSprite2D] = [$Monkey0, $Monkey1]
 @onready var _gator_spr: AnimatedSprite2D = $Gator
@@ -459,6 +460,11 @@ func _physics_process(delta: float) -> void:
 				gator.mode = "telegraph"
 				gator.telegraph_timer = GATOR_TELEGRAPH_TIME
 				gator.target_x = clamp(air.x, 15.0, WORLD_W - 15.0)
+		# Keyboard movement applied in physics step where delta is available.
+		if _kb_move != 0.0 and phase == "playing":
+			var kbd_speed := 110.0
+			seesaw.target_x = clamp(seesaw.target_x + _kb_move * kbd_speed * delta,
+				MONKEY_R, WORLD_W - MONKEY_R)
 	else:
 		_update_gator(delta)
 	if _selftest:
@@ -506,16 +512,16 @@ func _input(event: InputEvent) -> void:
 			_on_drag(event.position.x)
 
 	# Keyboard fallback for desktop testing
-	if event is InputEventKey and event.pressed:
-		var move := 0.0
-		if event.keycode == KEY_LEFT or event.keycode == KEY_A:
-			move = -1.0
-		elif event.keycode == KEY_RIGHT or event.keycode == KEY_D:
-			move = 1.0
-		if move != 0.0 and phase == "playing":
-			var speed := 110.0 * get_physics_process_delta_time()
-			seesaw.target_x = clamp(seesaw.target_x + move * speed,
-				MONKEY_R, WORLD_W - MONKEY_R)
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if not key_event.echo:
+			var is_left: bool = key_event.keycode == KEY_LEFT or key_event.keycode == KEY_A
+			var is_right: bool = key_event.keycode == KEY_RIGHT or key_event.keycode == KEY_D
+			if is_left or is_right:
+				if key_event.pressed:
+					_kb_move = -1.0 if is_left else 1.0
+				else:
+					_kb_move = 0.0
 
 func _on_tap() -> void:
 	if phase == "menu" or phase == "gameover":
