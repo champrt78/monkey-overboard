@@ -505,6 +505,18 @@ func _input(event: InputEvent) -> void:
 		if event.button_mask & MOUSE_BUTTON_MASK_LEFT:
 			_on_drag(event.position.x)
 
+	# Keyboard fallback for desktop testing
+	if event is InputEventKey and event.pressed:
+		var move := 0.0
+		if event.keycode == KEY_LEFT or event.keycode == KEY_A:
+			move = -1.0
+		elif event.keycode == KEY_RIGHT or event.keycode == KEY_D:
+			move = 1.0
+		if move != 0.0 and phase == "playing":
+			var speed := 110.0 * get_physics_process_delta_time()
+			seesaw.target_x = clamp(seesaw.target_x + move * speed,
+				MONKEY_R, WORLD_W - MONKEY_R)
+
 func _on_tap() -> void:
 	if phase == "menu" or phase == "gameover":
 		start_game()
@@ -527,6 +539,7 @@ func _draw() -> void:
 	if phase == "playing":
 		_draw_catch_guide()
 		_draw_offscreen_indicator()
+		_draw_drag_zone()
 
 # world helpers (apply camera offset)
 func _wy(y: float) -> float:
@@ -619,6 +632,14 @@ func _draw_catch_guide() -> void:
 		return
 	var col := Color(BANANA.r, BANANA.g, BANANA.b, 0.35)
 	draw_line(Vector2(up.x, y0), Vector2(up.x, y1), col, 0.75)
+
+func _draw_drag_zone() -> void:
+	if phase != "playing":
+		return
+	var bar_h := 12.0
+	var y0 := VIEW_H - bar_h
+	draw_rect(Rect2(Vector2(0, y0), Vector2(VIEW_W, bar_h)), Color(1, 1, 1, 0.08))
+	draw_string(_font, Vector2(0, y0 + 9), "DRAG", HORIZONTAL_ALIGNMENT_CENTER, VIEW_W, 6, Color(1, 1, 1, 0.25))
 
 func _rect_screen(x: float, y: float, w: float, h: float, c: Color) -> void:
 	draw_rect(Rect2(Vector2(x, y), Vector2(w, h)), c)
