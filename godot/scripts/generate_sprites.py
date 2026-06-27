@@ -112,6 +112,30 @@ SPRITES = [
         (1280, 96),
     ),
     (
+        "gator_lunge_sheet.png",
+        "High quality detailed pixel art sprite sheet matching BOTH reference images. "
+        "A cartoon alligator LUNGING forward in the same detailed modern-retro pixel art style as the jungle background. "
+        "2 frames in one horizontal row, final size 128x24 pixels (each frame 64x24). "
+        "Completely transparent background, NO mat, NO background color, NO checkerboard, NO gray border, PURE SOLID WHITE BACKGROUND #FFFFFF is also acceptable. "
+        "Thick black outline, strong cel-shading, jungle green scales, big yellow eyes, white teeth visible. "
+        "Frame 0: body coiled back ready to lunge, mouth open. Frame 1: stretched forward mid-lunge, jaws wide. "
+        "Side-view 2D game sprite facing LEFT, modern retro pixel art, cohesive with the lush jungle plate.",
+        (128, 24),
+        (512, 96),
+    ),
+    (
+        "gator_chomp_sheet.png",
+        "High quality detailed pixel art sprite sheet matching BOTH reference images. "
+        "A cartoon alligator CHOMPING in the same detailed modern-retro pixel art style as the jungle background. "
+        "2 frames in one horizontal row, final size 128x24 pixels (each frame 64x24). "
+        "Completely transparent background, NO mat, NO background color, NO checkerboard, NO gray border, PURE SOLID WHITE BACKGROUND #FFFFFF is also acceptable. "
+        "Thick black outline, strong cel-shading, jungle green scales, big yellow eyes, massive white teeth. "
+        "Frame 0: jaws wide open waiting for the monkey to fall in. Frame 1: jaws snapping shut. "
+        "Side-view 2D game sprite facing LEFT, modern retro pixel art, cohesive with the lush jungle plate.",
+        (128, 24),
+        (512, 96),
+    ),
+    (
         "banana_sheet.png",
         "High quality detailed pixel art sprite sheet matching BOTH reference images. "
         "A bright yellow banana in the same detailed modern-retro pixel art style as the jungle background. "
@@ -145,9 +169,9 @@ SPRITES = [
     ),
 ]
 
-_target = sys.argv[1] if len(sys.argv) > 1 else None
+_targets = set(sys.argv[1:]) if len(sys.argv) > 1 else set()
 for name, prompt, final_size, gen_size in SPRITES:
-    if _target and name != _target:
+    if _targets and name not in _targets:
         continue
     generate(name, prompt, final_size, gen_size)
 

@@ -389,7 +389,7 @@ func _update_gator_sprite() -> void:
 		"telegraph":
 			spr.play("alert")
 		"lunge":
-			spr.play("chomp")
+			spr.play("lunge")
 		"retreat":
 			spr.play("patrol")
 		"dash":
