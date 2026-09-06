@@ -1,10 +1,10 @@
 ---
-project_name: "Monkey Overboard"
+project_name: Monkey Overboard
 status: active
 completion_percent: 80
-next_task: "Phase 6: Polish (level banner, screen shake, score pop)"
+next_task: 'Phase 6: Polish (level banner, screen shake, score pop).'
 open_milestone_count: 4
-last_milestone_date: 2026-06-27
+last_milestone_date: '2026-06-27'
 ---
 
 # Monkey Overboard — Hub Metadata
