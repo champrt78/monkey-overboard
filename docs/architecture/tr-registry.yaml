@@ -7,3 +7,7 @@ requirements:
     system: polish
     text: camera shakes for 0.3 seconds when level advances (synchronized with banner)
     adr: docs/architecture/adr-0001-godot-port.md
+  - id: TR-polish-003
+    system: polish
+    text: floating score popup labels appear on banana grab (+10) and catch (+2), fade and rise over 0.5 seconds
+    adr: docs/architecture/adr-0001-godot-port.md

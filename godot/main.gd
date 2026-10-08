@@ -91,6 +91,8 @@ var _cam_y := 0.0
 @onready var _banana_pool: Node2D = $BananaPool
 @onready var _splash_pool: Node2D = $SplashPool
 
+var _score_pop_pool: Node2D
+
 @onready var _snd_launch: AudioStreamPlayer = $SndLaunch
 @onready var _snd_catch: AudioStreamPlayer = $SndCatch
 @onready var _snd_banana: AudioStreamPlayer = $SndBanana
@@ -122,6 +124,15 @@ func _ready() -> void:
 	seesaw = _make_seesaw()
 	gator = _make_gator()
 	bananas = []
+
+	# Create score pop pool if it doesn't exist
+	if not has_node("ScorePopPool"):
+		_score_pop_pool = Node2D.new()
+		_score_pop_pool.name = "ScorePopPool"
+		add_child(_score_pop_pool)
+	else:
+		_score_pop_pool = $ScorePopPool
+
 	if "--mo-selftest" in OS.get_cmdline_args() or "--mo-selftest" in OS.get_cmdline_user_args():
 		_selftest = true
 		start_game()
@@ -300,6 +311,7 @@ func _grab_bananas(air: Dictionary) -> void:
 		if dx * dx + dy * dy <= reach2:
 			if b.has("spr") and is_instance_valid(b.spr):
 				b.spr.queue_free()
+			_spawn_score_pop(POINTS_BANANA, b.x, b.y)
 			bananas.remove_at(i)
 			score += POINTS_BANANA
 			_snd_banana.play()
@@ -315,6 +327,7 @@ func _do_catch(air: Dictionary, ground: Dictionary, up: Vector2) -> void:
 	seesaw.up_side *= -1
 	air_index = 1 - air_index
 	_tumble_timer = 0.25
+	_spawn_score_pop(POINTS_CATCH, up.x, up.y)
 	score += POINTS_CATCH
 	_snd_catch.play()
 
@@ -405,6 +418,25 @@ func screen_shake(duration: float = 0.3, amplitude: float = 2.5) -> void:
 func _on_splash_finished(spr: AnimatedSprite2D) -> void:
 	if is_instance_valid(spr):
 		spr.queue_free()
+
+# Spawn floating score popup at world coordinates
+func _spawn_score_pop(points: int, x: float, y: float) -> void:
+	if not _score_pop_pool:
+		return
+
+	var label := Label.new()
+	label.text = "+%d" % points
+	label.add_theme_font_size_override("font_size", 12)
+	label.position = Vector2(x, y - _cam_y)
+	label.modulate = Color.WHITE
+	_score_pop_pool.add_child(label)
+
+	# Tween: rise upward and fade out over 0.5 seconds
+	var tween := create_tween()
+	tween.set_parallel(true)  # Run animations in parallel
+	tween.tween_to(label, "position", Vector2(x, y - _cam_y - 40.0), 0.5)
+	tween.tween_to(label, "modulate", Color(1.0, 1.0, 1.0, 0.0), 0.5)
+	tween.tween_callback(label.queue_free)
 
 # ---------- sprite updates ----------
 func _update_camera() -> void:
