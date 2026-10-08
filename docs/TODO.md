@@ -1,8 +1,8 @@
 # TODO - Monkey Overboard
 
 ## Now
-- [ ] Phase 6: Polish (level banner, screen shake, score pop).
-- [ ] Phase 5b: Real-device Android playtest.
+- [x] Phase 6: Polish (level banner, screen shake, score pop). — COMPLETED 2026-10-08
+- [ ] Phase 5b: Real-device Android playtest. — BLOCKED: no Android device/adb
 
 ## Next
 - [ ] Pause menu / back-to-menu from game over.
