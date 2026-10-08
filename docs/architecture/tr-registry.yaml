@@ -3,3 +3,7 @@ requirements:
     system: polish
     text: level banner shows on level advance for about 1.5 seconds without blocking play
     adr: docs/architecture/adr-0001-godot-port.md
+  - id: TR-polish-002
+    system: polish
+    text: camera shakes for 0.3 seconds when level advances (synchronized with banner)
+    adr: docs/architecture/adr-0001-godot-port.md
