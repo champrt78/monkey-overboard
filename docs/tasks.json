@@ -1,6 +1,121 @@
 {
   "tasks": [
     {
+      "id": "phase-6-polish-level-banner-screen-shake-score-pop",
+      "title": "Phase 6: Polish (level banner, screen shake, score pop).",
+      "status": "doing",
+      "completion_percent": 50,
+      "description": "Phase 6: Polish (level banner, screen shake, score pop).",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": []
+    },
+    {
+      "id": "phase-5b-real-device-android-playtest",
+      "title": "Phase 5b: Real-device Android playtest.",
+      "status": "doing",
+      "completion_percent": 50,
+      "description": "Phase 5b: Real-device Android playtest.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": []
+    },
+    {
+      "id": "pause-menu-back-to-menu-from-game-over",
+      "title": "Pause menu / back-to-menu from game over.",
+      "status": "todo",
+      "completion_percent": 0,
+      "description": "Pause menu / back-to-menu from game over.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": []
+    },
+    {
+      "id": "high-score-leaderboard-screen",
+      "title": "High-score leaderboard screen.",
+      "status": "todo",
+      "completion_percent": 0,
+      "description": "High-score leaderboard screen.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": []
+    },
+    {
+      "id": "optional-point-the-off-screen-chevron-at-the-see-saw-s-up-end-seesaw-x-up-side-plank-instead-of-the-fulcrum",
+      "title": "Optional: point the off-screen chevron at the see-saw's **up end** (`seesaw.x + up_side*PLANK`) instead of the fulcrum.",
+      "status": "todo",
+      "completion_percent": 0,
+      "description": "Optional: point the off-screen chevron at the see-saw's **up end** (`seesaw.x + up_side*PLANK`) instead of the fulcrum.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": []
+    },
+    {
+      "id": "sprite-art-phase-5-further-animatedsprite2d-polish-over-procedural-draw-calls",
+      "title": "Sprite art Phase 5+: further AnimatedSprite2D polish over procedural draw calls.",
+      "status": "todo",
+      "completion_percent": 0,
+      "description": "Sprite art Phase 5+: further AnimatedSprite2D polish over procedural draw calls.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": []
+    },
+    {
+      "id": "2026-06-23-web-prototype-v1-built-playtested-design-approved-locked",
+      "title": "2026-06-23 - Web prototype v1 built + playtested; design approved/locked.",
+      "status": "done",
+      "completion_percent": 100,
+      "description": "2026-06-23 - Web prototype v1 built + playtested; design approved/locked.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": [],
+      "completed_at": "2026-10-08T10:56:46+00:00"
+    },
+    {
+      "id": "2026-06-23-godot-4-6-port-physics-constants-1-4-from-web-low-res-pixel-viewport-headless-self-test-verified-core-loop-runs-clean",
+      "title": "2026-06-23 - Godot 4.6 port (physics/constants 1:4 from web, low-res pixel viewport, headless self-test); verified core loop runs clean.",
+      "status": "done",
+      "completion_percent": 100,
+      "description": "2026-06-23 - Godot 4.6 port (physics/constants 1:4 from web, low-res pixel viewport, headless self-test); verified core loop runs clean.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": [],
+      "completed_at": "2026-10-08T10:56:46+00:00"
+    },
+    {
+      "id": "2026-06-23-handoff-doc-project-docs-scaffolding-written-for-kimi",
+      "title": "2026-06-23 - Handoff doc + project docs scaffolding written for Kimi.",
+      "status": "done",
+      "completion_percent": 100,
+      "description": "2026-06-23 - Handoff doc + project docs scaffolding written for Kimi.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": [],
+      "completed_at": "2026-10-08T10:56:46+00:00"
+    },
+    {
+      "id": "2026-06-26-title-game-over-art-plates-press-start-2p-font-off-screen-indicator-sfx-wiring-verified",
+      "title": "2026-06-26 - Title/game-over art plates + Press Start 2P font + off-screen indicator + SFX wiring verified.",
+      "status": "done",
+      "completion_percent": 100,
+      "description": "2026-06-26 - Title/game-over art plates + Press Start 2P font + off-screen indicator + SFX wiring verified.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": [],
+      "completed_at": "2026-10-08T10:56:46+00:00"
+    },
+    {
+      "id": "2026-06-26-android-debug-apk-exports-and-signs-successfully",
+      "title": "2026-06-26 - Android debug APK exports and signs successfully.",
+      "status": "done",
+      "completion_percent": 100,
+      "description": "2026-06-26 - Android debug APK exports and signs successfully.",
+      "created_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T10:56:46+00:00",
+      "subtasks": [],
+      "completed_at": "2026-10-08T10:56:46+00:00"
+    },
+    {
       "id": "a3f7c1d9",
       "title": "Phase 6: Polish (level banner, screen shake, score pop)",
       "status": "todo",
@@ -13,7 +128,8 @@
       "due": null,
       "estimate": null,
       "subtasks": [],
-      "notes": ""
+      "notes": "",
+      "stale": true
     },
     {
       "id": "b2e8f4a1",
@@ -28,7 +144,8 @@
       "due": null,
       "estimate": null,
       "subtasks": [],
-      "notes": "Blocked per TODO.md: no Android device or adb in this environment."
+      "notes": "Blocked per TODO.md: no Android device or adb in this environment.",
+      "stale": true
     },
     {
       "id": "c9d1e5f2",
@@ -43,7 +160,8 @@
       "due": null,
       "estimate": null,
       "subtasks": [],
-      "notes": ""
+      "notes": "",
+      "stale": true
     },
     {
       "id": "d4a6b8c3",
@@ -58,7 +176,8 @@
       "due": null,
       "estimate": null,
       "subtasks": [],
-      "notes": ""
+      "notes": "",
+      "stale": true
     },
     {
       "id": "p6-level-banner",
@@ -68,7 +187,8 @@
       "description": "Story 001 in production/epics/polish, on branch gm/polish-level-banner. GameMachine implements it on the cheap model.",
       "created_at": "2026-10-08T10:51:07.937090+00:00",
       "updated_at": "2026-10-08T10:51:07.937090+00:00",
-      "subtasks": []
+      "subtasks": [],
+      "stale": true
     }
   ]
 }
