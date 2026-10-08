@@ -2,17 +2,18 @@
 
 # STATUS - monkey-overboard
 
-Generated: 2026-10-08T11:01:35+00:00 (UTC)
+Generated: 2026-10-08T11:02:37+00:00 (UTC)
 
 ## Counts
 
-- done: 5
-- doing: 3
+- done: 6
+- doing: 4
 - todo: 8
-- stale: 5
+- stale: 7
 
 ## Doing
 
+- phase-5b-real-device-android-playtest-blocked-no-android-device-adb Phase 5b: Real-device Android playtest. — BLOCKED: no Android device/adb
 - phase-6-polish-level-banner-screen-shake-score-pop Phase 6: Polish (level banner, screen shake, score pop).
 - phase-5b-real-device-android-playtest Phase 5b: Real-device Android playtest.
 - p6-level-banner Phase 6: level banner (via GameMachine build-loop test)
