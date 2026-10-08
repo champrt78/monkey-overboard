@@ -209,7 +209,7 @@
       "completion_percent": 0,
       "description": "Story 001 in production/epics/polish, on branch gm/polish-level-banner. GameMachine implements it on the cheap model. Tween bugs (tween_to) fixed by hand 2026-10-08; selftest runs with 0 errors; visual check pending.",
       "created_at": "2026-10-08T10:51:07.937090+00:00",
-      "updated_at": "2026-10-08T18:14:06.275444+00:00",
+      "updated_at": "2026-10-08T22:30:25.756566+00:00",
       "subtasks": [],
       "stale": true
     },
