@@ -1,0 +1,5 @@
+requirements:
+  - id: TR-polish-001
+    system: polish
+    text: level banner shows on level advance for about 1.5 seconds without blocking play
+    adr: docs/architecture/adr-0001-godot-port.md
