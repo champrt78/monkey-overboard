@@ -11,11 +11,11 @@ const WORLD_W := 135.0
 const WORLD_H := 720.0
 const WATER_Y := 705.0      # WORLD_H - 15
 const SEESAW_Y := 700.5     # WATER_Y - 4.5
-const PLANK := 22.0
-const TILT := 11.5
-const CATCH_RX_BASE := 14.0
-const CATCH_RX_MIN := 8.5
-const MONKEY_R := 6.5
+const PLANK := 28.0
+const TILT := 14.5
+const CATCH_RX_BASE := 17.0
+const CATCH_RX_MIN := 11.0
+const MONKEY_R := 9.5
 const GRAV := 225.0
 const LAUNCH_VY := -525.0
 const DRIFT_BASE := 24.0
@@ -26,7 +26,7 @@ const BANANA_BASE := 48
 const BANANA_PER_LEVEL := 12
 const BANANA_Y_MIN := 40.0
 const BANANA_Y_MAX := 640.0
-const GATOR_Y_OFFSET := 7.5
+const GATOR_Y_OFFSET := 8.5
 const GATOR_PATROL_SPEED := 14.0
 const GATOR_DASH_SPEED := 190.0
 const GATOR_LUNGE_SPEED := 280.0
@@ -41,7 +41,6 @@ const CAMERA_CATCH_BLEND_WINDOW := 340.0  # world units above seesaw where frami
 const CAMERA_MAX_SPEED := 320.0           # max camera pan speed (px/s)
 const CAMERA_OVERSHOOT := 80.0            # how far past the world bottom the camera can frame
 
-const MONKEY_FRAMES := preload("res://assets/sprites/monkey_frames.tres")
 const GATOR_FRAMES := preload("res://assets/sprites/gator_frames.tres")
 const BANANA_FRAMES := preload("res://assets/sprites/banana_frames.tres")
 const SPLASH_FRAMES := preload("res://assets/sprites/splash_frames.tres")
@@ -469,6 +468,7 @@ func _update_monkey_sprites() -> void:
 		var m: Dictionary = monkeys[i]
 		var spr: AnimatedSprite2D = _mono[i]
 		spr.position = Vector2(m.x, m.y - _cam_y)
+		spr.offset = Vector2(0.0, MONKEY_R - 14.0)   # 28 px frame, feet on the bottom row: feet land on the plank
 		match m.state:
 			"ground":
 				spr.play("idle")

@@ -212,6 +212,16 @@
       "updated_at": "2026-10-08T18:14:06.275444+00:00",
       "subtasks": [],
       "stale": true
+    },
+    {
+      "id": "bigger-monkeys",
+      "title": "Bigger, better-looking monkeys (28x28 frames, 24 px art)",
+      "status": "doing",
+      "completion_percent": 80,
+      "description": "Two hand-built sheets (A orange tuft, B dark round ears), PixelLab tested and rejected for this. Hit size/plank/catch/gator retuned (MONKEY_R 9.5, PLANK 28, TILT 14.5, CATCH 17/11, gator x1.25). Needs Ray's playtest for feel.",
+      "created_at": "2026-10-08T22:24:49.980595+00:00",
+      "updated_at": "2026-10-08T22:24:49.980595+00:00",
+      "subtasks": []
     }
   ]
 }

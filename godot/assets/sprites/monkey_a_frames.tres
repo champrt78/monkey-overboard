@@ -1,0 +1,82 @@
+[gd_resource type="SpriteFrames" load_steps=12 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/monkey_a_sheet.png" id="monkey_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle0"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(0, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(28, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ascend0"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(56, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ascend1"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(84, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_descend0"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(112, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_descend1"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(140, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tumble0"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(168, 0, 28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tumble1"]
+atlas = ExtResource("monkey_sheet")
+region = Rect2(196, 0, 28, 28)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ascend0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ascend1")
+}],
+"loop": true,
+"name": &"ascending",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_descend0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_descend1")
+}],
+"loop": true,
+"name": &"descending",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tumble0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tumble1")
+}],
+"loop": true,
+"name": &"tumble",
+"speed": 10.0
+}]

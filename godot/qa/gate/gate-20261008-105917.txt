@@ -1,0 +1,122 @@
+godot_gate: project=/c/Users/Ray/projects/monkey-overboard/godot godot=C:/Users/Ray/godot/Godot_v4.7.2-stable_win64_console.exe python=/c/Python314/python
+godot_gate: log=/c/Users/Ray/projects/monkey-overboard/godot/qa/gate/gate-20261008-105917.txt
+--- import: C:/Users/Ray/godot/Godot_v4.7.2-stable_win64_console.exe --headless --path <project> --import ---
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (2 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[  33% ] [90m[1mloading_editor_layout[22m | Reopening scenes...[39m[0m
+[  50% ] [90m[1mloading_editor_layout[22m | Loading central editor layout...[39m[0m
+[  66% ] [90m[1mloading_editor_layout[22m | Loading plugin window layout...[39m[0m
+[  83% ] [90m[1mloading_editor_layout[22m | Editor layout ready.[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+GATE import PASS godot --import exited 0
+--- lint: gdscript_lint.py full report (saved, never blocks) ---
+android/build/src/instrumented/assets/main.gd:3: UNTYPED_VAR var '_plugin_name' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:4: UNTYPED_VAR var '_android_plugin' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:6: UNTYPED_FUNC func '_ready' no return type (-> Type)
+android/build/src/instrumented/assets/main.gd:25: UNTYPED_VAR var 'incomplete_tests' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:36: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:39: UNTYPED_VAR var 'vibrator_service' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:43: UNTYPED_VAR var 'VibrationEffect' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:44: UNTYPED_VAR var 'effect' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:54: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:56: UNTYPED_VAR var 'activity' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:58: UNTYPED_VAR var 'toastCallable' has no type annotation and no ':='
+android/build/src/instrumented/assets/main.gd:59: UNTYPED_VAR var 'ToastClass' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/base_test.gd:10: UNTYPED_FUNC func '__exec_test' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:15: UNTYPED_FUNC func '__reset_tests' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:21: UNTYPED_FUNC func '__get_stack_frame' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:27: UNTYPED_FUNC func '__assert_pass' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:31: UNTYPED_FUNC func '__assert_fail' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:33: UNTYPED_VAR var 's' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/base_test.gd:39: UNTYPED_FUNC func 'assert_equal' 'actual' has no type, 'expected' has no type, no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:46: UNTYPED_FUNC func 'assert_true' 'value' has no type, no return type (-> Type)
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:6: UNTYPED_FUNC func 'run_tests' no return type (-> Type)
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:17: UNTYPED_VAR var 'data_file_path' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:19: UNTYPED_VAR var 'data_file' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:26: UNTYPED_VAR var 'file_content' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:30: UNTYPED_VAR var 'deletion_result' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:34: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:37: UNTYPED_VAR var 'app_context' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:42: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:45: UNTYPED_VAR var 'app_context' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:50: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:53: UNTYPED_VAR var 'app_context' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:58: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:61: UNTYPED_VAR var 'app_context' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:66: UNTYPED_VAR var 'EnvironmentClass' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:67: UNTYPED_VAR var 'downloads_dir' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:71: UNTYPED_VAR var 'EnvironmentClass' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:72: UNTYPED_VAR var 'documents_dir' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:4: UNTYPED_FUNC func 'run_tests' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:103: UNTYPED_VAR var 'obj_array' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:110: UNTYPED_FUNC func 'test_dictionary' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:117: UNTYPED_FUNC func 'test_object_overload' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:122: UNTYPED_VAR var 't2' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:123: UNTYPED_VAR var 't3' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:128: UNTYPED_VAR var 'arr_of_t2' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:129: UNTYPED_VAR var 'arr_of_t3' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:134: UNTYPED_FUNC func 'test_variant_conversion_safe_from_stack_overflow' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:142: UNTYPED_FUNC func 'test_big_integers' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:148: UNTYPED_FUNC func 'test_callable' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:149: UNTYPED_VAR var 'android_runtime' has no type annotation and no ':='
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:153: UNTYPED_VAR var 'cb1' has no type annotation and no ':='
+main.gd:229: UNTYPED_VAR var 'overlay' has no type annotation and no ':='
+51 findings in 5 files
+--- lint: gdscript_lint.py --rules UNTYPED_FUNC,CODE_AFTER_TRANSITION ---
+android/build/src/instrumented/assets/main.gd:6: UNTYPED_FUNC func '_ready' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:10: UNTYPED_FUNC func '__exec_test' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:15: UNTYPED_FUNC func '__reset_tests' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:21: UNTYPED_FUNC func '__get_stack_frame' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:27: UNTYPED_FUNC func '__assert_pass' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:31: UNTYPED_FUNC func '__assert_fail' no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:39: UNTYPED_FUNC func 'assert_equal' 'actual' has no type, 'expected' has no type, no return type (-> Type)
+android/build/src/instrumented/assets/test/base_test.gd:46: UNTYPED_FUNC func 'assert_true' 'value' has no type, no return type (-> Type)
+android/build/src/instrumented/assets/test/file_access/file_access_tests.gd:6: UNTYPED_FUNC func 'run_tests' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:4: UNTYPED_FUNC func 'run_tests' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:110: UNTYPED_FUNC func 'test_dictionary' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:117: UNTYPED_FUNC func 'test_object_overload' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:134: UNTYPED_FUNC func 'test_variant_conversion_safe_from_stack_overflow' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:142: UNTYPED_FUNC func 'test_big_integers' no return type (-> Type)
+android/build/src/instrumented/assets/test/javaclasswrapper/java_class_wrapper_tests.gd:148: UNTYPED_FUNC func 'test_callable' no return type (-> Type)
+15 findings in 4 files
+GATE lint FAIL 15 finding(s) in UNTYPED_FUNC,CODE_AFTER_TRANSITION
+--- settings: project_settings_check.py ---
+PASS display/window/size/viewport_width
+PASS display/window/size/viewport_height
+PASS display/window/stretch/mode
+PASS display/window/stretch/aspect
+PASS display/window/stretch/scale_mode
+PASS rendering/textures/canvas_textures/default_texture_filter
+PASS rendering/2d/snap/snap_2d_transforms_to_pixel
+PASS rendering/2d/snap/snap_2d_vertices_to_pixel
+PASS application/run/main_scene
+PASS autoloads
+autoload order: (none)
+OK: 10 passed, 0 failed, 0 missing
+GATE settings PASS OK: 10 passed, 0 failed, 0 missing
+--- scenes: scene_lint.py ---
+android/build/src/instrumented/assets/main.tscn:32: MISSING_METHOD method '_on_plugin_toast_button_pressed' not found in script 'res://main.gd' (node '.')
+android/build/src/instrumented/assets/main.tscn:33: MISSING_METHOD method '_on_vibration_button_pressed' not found in script 'res://main.gd' (node '.')
+android/build/src/instrumented/assets/main.tscn:34: MISSING_METHOD method '_on_gd_script_toast_button_pressed' not found in script 'res://main.gd' (node '.')
+GATE scenes FAIL 3 issue(s) reported
+GATE tests FAIL no test framework (neither addons/gut nor addons/gdUnit4)
+GATE play SKIP --skip-play
+GATE: FAIL (3 step(s) failed)

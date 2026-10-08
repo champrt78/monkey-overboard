@@ -1,10 +1,11 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_monkey_overboard_main"]
 [ext_resource type="Texture2D" path="res://assets/screens/title_plate.png" id="2_title_plate"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/jungle_bg.png" id="2a_jungle_bg"]
 [ext_resource type="Texture2D" path="res://assets/screens/gameover_plate.png" id="3_gameover_plate"]
-[ext_resource type="SpriteFrames" path="res://assets/sprites/monkey_frames.tres" id="4_monkey_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/monkey_a_frames.tres" id="4_monkey_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/monkey_b_frames.tres" id="4b_monkey_b_frames"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/gator_frames.tres" id="5_gator_frames"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/banana_frames.tres" id="6_banana_frames"]
 [ext_resource type="SpriteFrames" path="res://assets/sprites/splash_frames.tres" id="7_splash_frames"]
@@ -51,11 +52,11 @@ animation = &"idle"
 
 [node name="Monkey1" type="AnimatedSprite2D" parent="."]
 scale = Vector2(1.0, 1.0)
-sprite_frames = ExtResource("4_monkey_frames")
+sprite_frames = ExtResource("4b_monkey_b_frames")
 animation = &"idle"
 
 [node name="Gator" type="AnimatedSprite2D" parent="."]
-scale = Vector2(1.0, 1.0)
+scale = Vector2(1.25, 1.25)
 sprite_frames = ExtResource("5_gator_frames")
 animation = &"patrol"
 
