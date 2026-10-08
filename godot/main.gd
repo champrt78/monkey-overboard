@@ -223,6 +223,11 @@ func _next_level() -> void:
 	level += 1
 	_generate_bananas()
 	catch_radius = _catch_radius_for_level()
+	# Show level banner
+	if has_node("Overlay"):
+		var overlay = get_node("Overlay")
+		if overlay.has_method("show_level_banner"):
+			overlay.show_level_banner(level)
 
 func _launch(m: Dictionary, x: float, y: float) -> void:
 	m.state = "air"

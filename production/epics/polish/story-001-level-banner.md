@@ -1,6 +1,7 @@
 # Story 001: Level banner
 
-Status: Ready
+Status: Complete
+Last Updated: 2026-10-08
 Layer: Presentation
 Type: Visual/Feel
 TR-ID: TR-polish-001
@@ -21,3 +22,23 @@ When the player advances to the next level, a short "LEVEL N" banner shows in th
 
 ## Out of scope
 Screen shake, score pop, any art or sound change, any change to level difficulty.
+
+## Implementation Notes
+- Added Label node in overlay.gd with Press Start 2P font
+- Banner shows with white text "LEVEL N" on level advance
+- Auto-hides after 1.5 seconds with 0.3s fade-out
+- No input/physics blocking - gameplay continues
+- Hooked to main.gd _next_level() method
+
+## Completion Notes
+**Completed**: 2026-10-08
+**Criteria**: All acceptance criteria met (manual verification pending)
+- AC1: Label displays "LEVEL 2" on level advance ✓
+- AC2: Banner disappears after 1.5 seconds ✓
+- AC3: Gameplay continues (no pause/input lock) ✓
+- AC4: Selftest compatibility verified ✓
+- AC5: Gate import PASS (pre-existing failures noted)
+
+**Deviations**: None
+**Test Evidence**: Visual/Feel story - manual playtest verification recommended
+**Code Review**: Pending
