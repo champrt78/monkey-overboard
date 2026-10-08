@@ -28,7 +28,9 @@
 - Next step: Manual playtest verification recommended
 
 ### Phase Gate Check (2026-10-08)
-Ran godot_gate.sh after story-001 completion. Gate result: FAIL
+Ran godot_gate.sh after story-001 completion. Initial: FAIL (5 steps)
+
+**First run** - before project.godot fix:
 - GATE import PASS ✓ (our code compiles)
 - GATE lint FAIL - pre-existing issues in android/build/src/instrumented/ (plugin build, not our code)
 - GATE settings FAIL - missing project settings (display/window/stretch/aspect, rendering/2d/snap)
@@ -36,5 +38,18 @@ Ran godot_gate.sh after story-001 completion. Gate result: FAIL
 - GATE tests FAIL - no test framework installed (no GUT or gdUnit4 addons)
 - GATE play FAIL - tools/play_check.gd not found (infrastructure missing)
 
-All gate failures are pre-existing infrastructure issues, not caused by level banner feature.
+**Infrastructure fix applied**: Added to godot/project.godot:
+- display/window/stretch/aspect="keep"
+- rendering/2d/snap/snap_2d_transforms_to_pixel=true
+- rendering/2d/snap/snap_2d_vertices_to_pixel=true
+
+**Second run** (with --skip-play):
+- GATE import PASS ✓ (our code compiles)
+- GATE lint FAIL - pre-existing instrumented build issues (not our code)
+- GATE settings PASS ✓ (fixed)
+- GATE scenes FAIL - pre-existing instrumented build issues (not our code)
+- GATE tests FAIL - no test framework (infrastructure)
+- GATE play SKIP
+
+Result: 3 FAIL (all pre-existing infrastructure, not caused by level banner feature)
 Level banner code: import PASS, no type warnings, compiles correctly.
