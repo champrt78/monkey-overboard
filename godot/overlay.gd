@@ -34,6 +34,11 @@ func show_level_banner(level: int) -> void:
 	_banner_timer = BANNER_DURATION
 	_banner.visible = true
 
+	# Trigger screen shake synchronized with banner
+	var main := get_node_or_null(main_path)
+	if main and main.has_method("screen_shake"):
+		main.screen_shake(0.3, 2.5)  # 0.3 second duration, 2.5 pixel amplitude
+
 func _process(delta: float) -> void:
 	if _banner_timer > 0.0:
 		_banner_timer -= delta

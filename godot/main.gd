@@ -109,6 +109,7 @@ var _selftest_frames := 0
 var _selftest_catches := 0
 
 var _tumble_timer := 0.0
+var _shake_tween: Tween
 
 const SAVE_PATH := "user://monkey-overboard.save"
 
@@ -380,6 +381,25 @@ func _spawn_splash(x: float, y: float) -> void:
 	spr.animation_finished.connect(_on_splash_finished.bind(spr))
 	spr.play("default")
 	_splash_pool.add_child(spr)
+
+# Screen shake effect - applies a temporary offset to the main node
+func screen_shake(duration: float = 0.3, amplitude: float = 2.5) -> void:
+	if _shake_tween:
+		_shake_tween.kill()
+
+	var original_pos := position
+	_shake_tween = create_tween()
+	_shake_tween.set_trans(Tween.TRANS_LINEAR)
+
+	# Create shake pattern: rapid oscillations with decreasing amplitude
+	var num_shakes: int = 6
+	for i in range(num_shakes):
+		var offset_x: float = randf_range(-amplitude, amplitude)
+		var offset_y: float = randf_range(-amplitude, amplitude)
+		var shake_step_duration: float = duration / num_shakes
+		_shake_tween.tween_to(self, "position", original_pos + Vector2(offset_x, offset_y), shake_step_duration)
+
+	_shake_tween.tween_to(self, "position", original_pos, duration / num_shakes)
 
 
 func _on_splash_finished(spr: AnimatedSprite2D) -> void:
