@@ -410,9 +410,9 @@ func screen_shake(duration: float = 0.3, amplitude: float = 2.5) -> void:
 		var offset_x: float = randf_range(-amplitude, amplitude)
 		var offset_y: float = randf_range(-amplitude, amplitude)
 		var shake_step_duration: float = duration / num_shakes
-		_shake_tween.tween_to(self, "position", original_pos + Vector2(offset_x, offset_y), shake_step_duration)
+		_shake_tween.tween_property(self, "position", original_pos + Vector2(offset_x, offset_y), shake_step_duration)
 
-	_shake_tween.tween_to(self, "position", original_pos, duration / num_shakes)
+	_shake_tween.tween_property(self, "position", original_pos, duration / num_shakes)
 
 
 func _on_splash_finished(spr: AnimatedSprite2D) -> void:
@@ -434,9 +434,9 @@ func _spawn_score_pop(points: int, x: float, y: float) -> void:
 	# Tween: rise upward and fade out over 0.5 seconds
 	var tween := create_tween()
 	tween.set_parallel(true)  # Run animations in parallel
-	tween.tween_to(label, "position", Vector2(x, y - _cam_y - 40.0), 0.5)
-	tween.tween_to(label, "modulate", Color(1.0, 1.0, 1.0, 0.0), 0.5)
-	tween.tween_callback(label.queue_free)
+	tween.tween_property(label, "position", Vector2(x, y - _cam_y - 40.0), 0.5)
+	tween.tween_property(label, "modulate", Color(1.0, 1.0, 1.0, 0.0), 0.5)
+	tween.chain().tween_callback(label.queue_free)   # parallel mode would otherwise free the label at t=0
 
 # ---------- sprite updates ----------
 func _update_camera() -> void:
