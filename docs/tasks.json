@@ -7,7 +7,7 @@
       "completion_percent": 50,
       "description": "Phase 6: Polish (level banner, screen shake, score pop).",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": []
     },
     {
@@ -17,7 +17,7 @@
       "completion_percent": 50,
       "description": "Phase 5b: Real-device Android playtest.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": []
     },
     {
@@ -27,7 +27,7 @@
       "completion_percent": 0,
       "description": "Pause menu / back-to-menu from game over.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": []
     },
     {
@@ -37,7 +37,7 @@
       "completion_percent": 0,
       "description": "High-score leaderboard screen.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": []
     },
     {
@@ -47,7 +47,7 @@
       "completion_percent": 0,
       "description": "Optional: point the off-screen chevron at the see-saw's **up end** (`seesaw.x + up_side*PLANK`) instead of the fulcrum.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": []
     },
     {
@@ -57,7 +57,7 @@
       "completion_percent": 0,
       "description": "Sprite art Phase 5+: further AnimatedSprite2D polish over procedural draw calls.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": []
     },
     {
@@ -67,7 +67,7 @@
       "completion_percent": 100,
       "description": "2026-06-23 - Web prototype v1 built + playtested; design approved/locked.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": [],
       "completed_at": "2026-10-08T10:56:46+00:00"
     },
@@ -78,7 +78,7 @@
       "completion_percent": 100,
       "description": "2026-06-23 - Godot 4.6 port (physics/constants 1:4 from web, low-res pixel viewport, headless self-test); verified core loop runs clean.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": [],
       "completed_at": "2026-10-08T10:56:46+00:00"
     },
@@ -89,7 +89,7 @@
       "completion_percent": 100,
       "description": "2026-06-23 - Handoff doc + project docs scaffolding written for Kimi.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": [],
       "completed_at": "2026-10-08T10:56:46+00:00"
     },
@@ -100,7 +100,7 @@
       "completion_percent": 100,
       "description": "2026-06-26 - Title/game-over art plates + Press Start 2P font + off-screen indicator + SFX wiring verified.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": [],
       "completed_at": "2026-10-08T10:56:46+00:00"
     },
@@ -111,7 +111,7 @@
       "completion_percent": 100,
       "description": "2026-06-26 - Android debug APK exports and signs successfully.",
       "created_at": "2026-10-08T10:56:46+00:00",
-      "updated_at": "2026-10-08T10:56:46+00:00",
+      "updated_at": "2026-10-08T11:01:35+00:00",
       "subtasks": [],
       "completed_at": "2026-10-08T10:56:46+00:00"
     },
